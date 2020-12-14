@@ -5,7 +5,7 @@ python main.py \
 --max_seq_length 100 \
 --threshold 10 \
 --batch_size 16 \
---epochs 30 \
+--epochs 5 \
 --save_dir results/mimic_cxr \
 --step_size 1 \
 --gamma 0.8 \
