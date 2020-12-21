@@ -1,10 +1,14 @@
 import json
 import re
 from collections import Counter
+# import torch
+# import torch.nn as nn
 
-
+#change base class --lzh
 class Tokenizer(object):
+# class Tokenizer(nn.Module):
     def __init__(self, args):
+        super(Tokenizer, self).__init__()
         self.ann_path = args.ann_path
         self.threshold = args.threshold
         self.dataset_name = args.dataset_name

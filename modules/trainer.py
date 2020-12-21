@@ -15,7 +15,10 @@ class BaseTrainer(object):
         self.device, device_ids = self._prepare_device(args.n_gpu)
         self.model = model.to(self.device)
         if len(device_ids) > 1:
+            # print('device_ids', device_ids)
             self.model = torch.nn.DataParallel(model, device_ids=device_ids)
+            # self.model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids)
+            # self.model = model.to(self.device)
 
         self.criterion = criterion
         self.metric_ftns = metric_ftns
@@ -113,6 +116,7 @@ class BaseTrainer(object):
         record_table.to_csv(record_path, index=False)
 
     def _prepare_device(self, n_gpu_use):
+        # print('n_gpu_use', n_gpu_use)
         n_gpu = torch.cuda.device_count()
         if n_gpu_use > 0 and n_gpu == 0:
             print("Warning: There\'s no GPU available on this machine," "training will be performed on CPU.")
@@ -124,6 +128,7 @@ class BaseTrainer(object):
             n_gpu_use = n_gpu
         device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
         list_ids = list(range(n_gpu_use))
+        # print('list_ids', list_ids)
         return device, list_ids
 
     def _save_checkpoint(self, epoch, save_best=False):
@@ -192,7 +197,9 @@ class Trainer(BaseTrainer):
         for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.train_dataloader):
             images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), reports_masks.to(
                 self.device)
+            # print('self.device', self.device)
             output = self.model(images, reports_ids, mode='train')
+            # print('output size is', output.size(), 'report_ids', reports_ids.size(), 'reports_masks', reports_masks.size())
             loss = self.criterion(output, reports_ids, reports_masks)
             train_loss += loss.item()
             self.optimizer.zero_grad()
@@ -204,12 +211,17 @@ class Trainer(BaseTrainer):
         self.model.eval()
         with torch.no_grad():
             val_gts, val_res = [], []
+            # print('self.device', self.device)
             for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.val_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
                 output = self.model(images, mode='sample')
-                reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
-                ground_truths = self.model.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
+                # print('output size is', output.size())
+                # print(self.model.__dict__)
+                reports = self.val_dataloader.tokenizer.decode_batch(output.cpu().numpy())
+                ground_truths = self.val_dataloader.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
+                # reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
+                # ground_truths = self.model.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
                 val_res.extend(reports)
                 val_gts.extend(ground_truths)
             val_met = self.metric_ftns({i: [gt] for i, gt in enumerate(val_gts)},
@@ -222,9 +234,11 @@ class Trainer(BaseTrainer):
             for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.test_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
+                # images, reports_ids, reports_masks = images.cuda(), reports_ids.cuda(), reports_masks.cuda()
                 output = self.model(images, mode='sample')
-                reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
-                ground_truths = self.model.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
+                #print(self.model.)
+                reports = self.test_dataloader.tokenizer.decode_batch(output.cpu().numpy())
+                ground_truths = self.test_dataloader.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
                 test_res.extend(reports)
                 test_gts.extend(ground_truths)
             test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
