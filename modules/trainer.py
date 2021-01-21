@@ -91,6 +91,7 @@ class BaseTrainer(object):
                     break
 
             if epoch % self.save_period == 0:
+                print('save_period line has been called')
                 self._save_checkpoint(epoch, save_best=best)
         self._print_best()
         self._print_best_to_file()
@@ -138,7 +139,8 @@ class BaseTrainer(object):
             'optimizer': self.optimizer.state_dict(),
             'monitor_best': self.mnt_best
         }
-        filename = os.path.join(self.checkpoint_dir, 'current_checkpoint.pth')
+        # filename = os.path.join(self.checkpoint_dir, 'current_checkpoint.pth')
+        filename = os.path.join(self.checkpoint_dir, 'epoch_'+str(epoch)+'.pth')
         torch.save(state, filename)
         print("Saving checkpoint: {} ...".format(filename))
         if save_best:
@@ -191,7 +193,7 @@ class Trainer(BaseTrainer):
         self.test_dataloader = test_dataloader
 
     def _train_epoch(self, epoch):
-
+        start_time = time.time()
         train_loss = 0
         self.model.train()
         for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.train_dataloader):
@@ -207,7 +209,10 @@ class Trainer(BaseTrainer):
             torch.nn.utils.clip_grad_value_(self.model.parameters(), 0.1)
             self.optimizer.step()
         log = {'train_loss': train_loss / len(self.train_dataloader)}
+        elapsed_time = time.time() - start_time
+        print('time for training one epoch', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
+        start_time = time.time()
         self.model.eval()
         with torch.no_grad():
             val_gts, val_res = [], []
@@ -227,7 +232,10 @@ class Trainer(BaseTrainer):
             val_met = self.metric_ftns({i: [gt] for i, gt in enumerate(val_gts)},
                                        {i: [re] for i, re in enumerate(val_res)})
             log.update(**{'val_' + k: v for k, v in val_met.items()})
+        elapsed_time = time.time() - start_time
+        print('time for validating one epoch', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
+        start_time = time.time()
         self.model.eval()
         with torch.no_grad():
             test_gts, test_res = [], []
@@ -244,6 +252,8 @@ class Trainer(BaseTrainer):
             test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
                                         {i: [re] for i, re in enumerate(test_res)})
             log.update(**{'test_' + k: v for k, v in test_met.items()})
+        elapsed_time = time.time() - start_time
+        print('time for testing one epoch', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
         self.lr_scheduler.step()
 

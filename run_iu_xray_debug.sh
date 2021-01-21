@@ -4,10 +4,10 @@ python main.py \
 --dataset_name iu_xray \
 --max_seq_length 60 \
 --threshold 3 \
---batch_size 16 \
---epochs 100 \
---save_dir results/iu_xray_debug \
---step_size 100 \
+--batch_size 40 \
+--epochs 1 \
+--save_dir results/iu_xray_debugv2 \
+--step_size 50 \
 --gamma 0.1 \
---seed 9223 \
---n_gpu 2 
+--n_gpu 1 \
+--seed 9223

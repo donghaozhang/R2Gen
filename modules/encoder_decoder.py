@@ -14,12 +14,19 @@ from .att_model import pack_wrapper, AttModel
 
 
 def clones(module, N):
+    #U nchanged
     return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
 
 
-def attention(query, key, value, mask=None, dropout=None):
+def attention_aug(query, key, value, mask=None, dropout=None):
+    # This function is advanced version of attention proposed by X-Linear
     d_k = query.size(-1)
+    print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+    if mask is not None:
+        print('mask size', mask.size())
+    print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+    print('the size of scores', scores.size())
     if mask is not None:
         scores = scores.masked_fill(mask == 0, -1e9)
     p_attn = F.softmax(scores, dim=-1)
@@ -28,13 +35,36 @@ def attention(query, key, value, mask=None, dropout=None):
     return torch.matmul(p_attn, value), p_attn
 
 
+def attention(query, key, value, mask=None, dropout=None):
+    # Unchanged
+    d_k = query.size(-1)
+    print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+    if mask is not None:
+        print('mask size', mask.size())
+    print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
+    scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+    print('the size of scoresxxxx', scores.size())
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, -1e9)
+    p_attn = F.softmax(scores, dim=-1)
+    print('p_attn', p_attn.size())
+    if dropout is not None:
+        p_attn = dropout(p_attn)
+    print('result size is', p_attn.size())
+    return torch.matmul(p_attn, value), p_attn
+
+
 def subsequent_mask(size):
+    # Unchanged
+    # Mask out subsequent positions
     attn_shape = (1, size, size)
     subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
     return torch.from_numpy(subsequent_mask) == 0
 
 
 class Transformer(nn.Module):
+    # Different from original implmentation, memory operation is introduced in decode
+    # Name of original implmentation is  
     def __init__(self, encoder, decoder, src_embed, tgt_embed, rm):
         super(Transformer, self).__init__()
         self.encoder = encoder
@@ -44,24 +74,30 @@ class Transformer(nn.Module):
         self.rm = rm
 
     def forward(self, src, tgt, src_mask, tgt_mask):
+        # print('forward function of Transformer class')
         return self.decode(self.encode(src, src_mask), src_mask, tgt, tgt_mask)
 
     def encode(self, src, src_mask):
+        # print('encode function of Transformer class')
         return self.encoder(self.src_embed(src), src_mask)
 
     def decode(self, hidden_states, src_mask, tgt, tgt_mask):
+        # print('decode function of Transformer class')
         memory = self.rm.init_memory(hidden_states.size(0)).to(hidden_states)
         memory = self.rm(self.tgt_embed(tgt), memory)
         return self.decoder(self.tgt_embed(tgt), hidden_states, src_mask, tgt_mask, memory)
 
 
 class Encoder(nn.Module):
+    #Encoder
+    #"Core encoder is a stack of N layers"
     def __init__(self, layer, N):
         super(Encoder, self).__init__()
         self.layers = clones(layer, N)
         self.norm = LayerNorm(layer.d_model)
 
     def forward(self, x, mask):
+        # print('forward function of Encoder class')
         for layer in self.layers:
             x = layer(x, mask)
         return self.norm(x)
@@ -76,6 +112,7 @@ class EncoderLayer(nn.Module):
         self.d_model = d_model
 
     def forward(self, x, mask):
+        # print('forward function of EncoderLayer class')
         x = self.sublayer[0](x, lambda x: self.self_attn(x, x, x, mask))
         return self.sublayer[1](x, self.feed_forward)
 
@@ -87,10 +124,12 @@ class SublayerConnection(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, sublayer):
+        # print('forward function of SublayerConnection class')
         return x + self.dropout(sublayer(self.norm(x)))
 
 
 class LayerNorm(nn.Module):
+    #Unchanged
     def __init__(self, features, eps=1e-6):
         super(LayerNorm, self).__init__()
         self.gamma = nn.Parameter(torch.ones(features))
@@ -98,24 +137,28 @@ class LayerNorm(nn.Module):
         self.eps = eps
 
     def forward(self, x):
+        # print('forward function LayerNorm class')
         mean = x.mean(-1, keepdim=True)
         std = x.std(-1, keepdim=True)
         return self.gamma * (x - mean) / (std + self.eps) + self.beta
 
 
 class Decoder(nn.Module):
+    # Different: an additional parameter memory is introduced 
     def __init__(self, layer, N):
         super(Decoder, self).__init__()
         self.layers = clones(layer, N)
         self.norm = LayerNorm(layer.d_model)
 
     def forward(self, x, hidden_states, src_mask, tgt_mask, memory):
+        # print('forward function Decoder class')
         for layer in self.layers:
             x = layer(x, hidden_states, src_mask, tgt_mask, memory)
         return self.norm(x)
 
 
 class DecoderLayer(nn.Module):
+    # Different: an additional parameter, memory, is introduced 
     def __init__(self, d_model, self_attn, src_attn, feed_forward, dropout, rm_num_slots, rm_d_model):
         super(DecoderLayer, self).__init__()
         self.d_model = d_model
@@ -125,6 +168,7 @@ class DecoderLayer(nn.Module):
         self.sublayer = clones(ConditionalSublayerConnection(d_model, dropout, rm_num_slots, rm_d_model), 3)
 
     def forward(self, x, hidden_states, src_mask, tgt_mask, memory):
+        # print('forward function of DecoderLayer class')
         m = hidden_states
         x = self.sublayer[0](x, lambda x: self.self_attn(x, x, x, tgt_mask), memory)
         x = self.sublayer[1](x, lambda x: self.src_attn(x, m, m, src_mask), memory)
@@ -138,6 +182,7 @@ class ConditionalSublayerConnection(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, sublayer, memory):
+        # print('forward function of ConditionalSublayerConnection class')
         return x + self.dropout(sublayer(self.norm(x, memory)))
 
 
@@ -164,6 +209,7 @@ class ConditionalLayerNorm(nn.Module):
                 nn.init.constant_(m.bias, 0.1)
 
     def forward(self, x, memory):
+        # print('forward function of ConditionalLayerNorm class')
         mean = x.mean(-1, keepdim=True)
         std = x.std(-1, keepdim=True)
         delta_gamma = self.mlp_gamma(memory)
@@ -180,6 +226,7 @@ class ConditionalLayerNorm(nn.Module):
 
 
 class MultiHeadedAttention(nn.Module):
+    #Unchanged
     def __init__(self, h, d_model, dropout=0.1):
         super(MultiHeadedAttention, self).__init__()
         assert d_model % h == 0
@@ -190,6 +237,7 @@ class MultiHeadedAttention(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, query, key, value, mask=None):
+        # print('forward function of MultiHeadedAttention class')
         if mask is not None:
             mask = mask.unsqueeze(1)
         nbatches = query.size(0)
@@ -204,6 +252,7 @@ class MultiHeadedAttention(nn.Module):
 
 
 class PositionwiseFeedForward(nn.Module):
+    #Unchanged
     def __init__(self, d_model, d_ff, dropout=0.1):
         super(PositionwiseFeedForward, self).__init__()
         self.w_1 = nn.Linear(d_model, d_ff)
@@ -211,16 +260,20 @@ class PositionwiseFeedForward(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
+        # print('forward function of PositionwiseFeedForward class')
         return self.w_2(self.dropout(F.relu(self.w_1(x))))
 
 
 class Embeddings(nn.Module):
+    # Unchanged
     def __init__(self, d_model, vocab):
         super(Embeddings, self).__init__()
+        # print('Embeddings function is being called')
         self.lut = nn.Embedding(vocab, d_model)
         self.d_model = d_model
 
     def forward(self, x):
+        # print('forward function of Embedding class')
         return self.lut(x) * math.sqrt(self.d_model)
 
 
@@ -239,6 +292,7 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
+        # print('forward function of PositionalEncoding class is being called')
         x = x + self.pe[:, :x.size(1)]
         return self.dropout(x)
 
@@ -247,6 +301,7 @@ class RelationalMemory(nn.Module):
 
     def __init__(self, num_slots, d_model, num_heads=1):
         super(RelationalMemory, self).__init__()
+        # print('RelationalMemory function is being called')
         self.num_slots = num_slots
         self.num_heads = num_heads
         self.d_model = d_model
@@ -261,6 +316,7 @@ class RelationalMemory(nn.Module):
         self.U = nn.Linear(self.d_model, self.d_model * 2)
 
     def init_memory(self, batch_size):
+        # print('init_memory function of RelationalMemory class')
         memory = torch.stack([torch.eye(self.num_slots)] * batch_size)
         if self.d_model > self.num_slots:
             diff = self.d_model - self.num_slots
@@ -272,6 +328,7 @@ class RelationalMemory(nn.Module):
         return memory
 
     def forward_step(self, input, memory):
+        # print('forward_step function of RelationalMemory class')
         memory = memory.reshape(-1, self.num_slots, self.d_model)
         q = memory
         k = torch.cat([memory, input.unsqueeze(1)], 1)
@@ -291,6 +348,7 @@ class RelationalMemory(nn.Module):
         return next_memory
 
     def forward(self, inputs, memory):
+        # print('forward function of RelationalMemory class is being called')
         outputs = []
         for i in range(inputs.shape[1]):
             memory = self.forward_step(inputs[:, i], memory)
@@ -303,6 +361,9 @@ class RelationalMemory(nn.Module):
 class EncoderDecoder(AttModel):
 
     def make_model(self, tgt_vocab):
+        # Different: Generator is gone 
+        # only nn.Sequential(Embeddings(d_model, tgt_vocab), c(position)) is called
+        # nn.Sequential(Embeddings(d_model, src_vocab), c(position)) is called
         c = copy.deepcopy
         attn = MultiHeadedAttention(self.num_heads, self.d_model)
         ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
@@ -323,6 +384,7 @@ class EncoderDecoder(AttModel):
 
     def __init__(self, args, tokenizer):
         super(EncoderDecoder, self).__init__(args, tokenizer)
+        # print('init fucntion of EncoderDecoder class is being called')
         self.args = args
         self.num_layers = args.num_layers
         self.d_model = args.d_model
@@ -370,7 +432,7 @@ class EncoderDecoder(AttModel):
         return att_feats, seq, att_masks, seq_mask
 
     def _forward(self, fc_feats, att_feats, seq, att_masks=None):
-
+        # print('_forward function of EncoderDecoder class is being called')
         att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks, seq)
         out = self.model(att_feats, seq, att_masks, seq_mask)
         outputs = F.log_softmax(self.logit(out), dim=-1)

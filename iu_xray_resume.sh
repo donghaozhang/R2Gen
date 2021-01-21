@@ -5,9 +5,11 @@ python main.py \
 --max_seq_length 60 \
 --threshold 3 \
 --batch_size 16 \
---epochs 100 \
---save_dir results/iu_xray_debug \
---step_size 100 \
+--epochs 1 \
+--save_dir results/iu_xray_debugv2 \
+--step_size 50 \
 --gamma 0.1 \
---seed 9223 \
---n_gpu 2 
+--n_gpu 1 \
+--save_period 2 
+# --resume results/iu_xray_debug/model_best.pth \
+# --seed 9223
