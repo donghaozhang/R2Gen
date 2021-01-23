@@ -29,6 +29,7 @@ def parse_agrs():
     parser.add_argument('--visual_extractor_pretrained', type=bool, default=True, help='whether to load the pretrained visual extractor')
 
     # Model settings (for Transformer)
+    parser.add_argument('--model', type=str, default='r2gen', help='the type of model. The default model is r2gen.')
     parser.add_argument('--d_model', type=int, default=512, help='the dimension of Transformer.')
     parser.add_argument('--d_ff', type=int, default=512, help='the dimension of FFN.')
     parser.add_argument('--d_vf', type=int, default=2048, help='the dimension of the patch features.')
@@ -41,6 +42,7 @@ def parse_agrs():
     parser.add_argument('--pad_idx', type=int, default=0, help='the index of <pad>.')
     parser.add_argument('--use_bn', type=int, default=0, help='whether to use batch normalization.')
     parser.add_argument('--drop_prob_lm', type=float, default=0.5, help='the dropout rate of the output layer.')
+    
     # for Relational Memory
     parser.add_argument('--rm_num_slots', type=int, default=3, help='the number of memory slots.')
     parser.add_argument('--rm_num_heads', type=int, default=8, help='the numebr of heads in rm.')
@@ -105,7 +107,11 @@ def main():
     test_dataloader = R2DataLoader(args, tokenizer, split='test', shuffle=False)
 
     # build model architecture
-    model = R2GenModel(args, tokenizer)
+    if args.model == 'r2gen':
+        model = R2GenModel(args, tokenizer)
+    elif args.model == 'r2genaug':
+        model = R2GenModelAug(args, tokenizer)
+
 
     # get function handles of loss and metrics
     criterion = compute_loss

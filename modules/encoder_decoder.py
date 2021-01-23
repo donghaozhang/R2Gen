@@ -129,7 +129,7 @@ class EncoderDecoderAug(AttModel):
         # only nn.Sequential(Embeddings(d_model, tgt_vocab), c(position)) is called
         # nn.Sequential(Embeddings(d_model, src_vocab), c(position)) is called
         c = copy.deepcopy
-        attn = MultiHeadedAttention(self.num_heads, self.d_model)
+        attn = MultiHeadedAttentionAug(self.num_heads, self.d_model)
         ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
         position = PositionalEncoding(self.d_model, self.dropout)
         rm = RelationalMemory(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
