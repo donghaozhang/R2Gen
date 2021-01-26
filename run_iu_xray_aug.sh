@@ -1,5 +1,5 @@
 python main.py \
---model \
+--model r2genaug \
 --image_dir data/iu_xray/images/ \
 --ann_path data/iu_xray/annotation.json \
 --dataset_name iu_xray \

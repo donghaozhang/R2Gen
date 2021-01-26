@@ -7,7 +7,7 @@ from modules.metrics import compute_scores
 from modules.optimizers import build_optimizer, build_lr_scheduler
 from modules.trainer import Trainer
 from modules.loss import compute_loss
-from models.r2gen import R2GenModel
+from models.r2gen import R2GenModel, R2GenModelAug
 
 
 def parse_agrs():
@@ -110,6 +110,7 @@ def main():
     if args.model == 'r2gen':
         model = R2GenModel(args, tokenizer)
     elif args.model == 'r2genaug':
+        print('this line has been called')
         model = R2GenModelAug(args, tokenizer)
 
 

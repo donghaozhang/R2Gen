@@ -4,6 +4,12 @@
 # result = map(lambda x, y: x + y, numbers1, numbers2) 
 # print(list(result))
 
-str1 = "geek"
-print(id(str1))
-
+# str1 = "geek"
+# print(id(str1))
+import torch
+import torch.nn as nn
+m = nn.ELU()
+input = torch.randn(2)
+print(input)
+output = m(input)
+print(output)

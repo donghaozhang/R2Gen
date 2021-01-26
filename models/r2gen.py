@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 
 from modules.visual_extractor import VisualExtractor
-from modules.encoder_decoder import EncoderDecoder
+from modules.encoder_decoder import EncoderDecoder, EncoderDecoderAug
 
 
 class R2GenModel(nn.Module):
@@ -65,11 +65,12 @@ class R2GenModel(nn.Module):
 
 class R2GenModelAug(nn.Module):
     def __init__(self, args, tokenizer):
-        super(R2GenModel, self).__init__()
+        # print('R2GenModelAug class is being called')
+        super(R2GenModelAug, self).__init__()
         self.args = args
         self.tokenizer = tokenizer
         self.visual_extractor = VisualExtractor(args)
-        self.encoder_decoder = EncoderDecoder(args, tokenizer)
+        self.encoder_decoder = EncoderDecoderAug(args, tokenizer)
         # if args.dataset_name == 'iu_xray':
         #     self.forward = self.forward_iu_xray
         # else:

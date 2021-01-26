@@ -19,14 +19,15 @@ def clones(module, N):
 
 
 def attention_aug(query, key, value, mask=None, dropout=None):
+    # print('attention_aug function is being called')
     # This function is advanced version of attention proposed by X-Linear
     d_k = query.size(-1)
-    print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
-    if mask is not None:
-        print('mask size', mask.size())
-    print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
+    # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+    # if mask is not None:
+    #     print('mask size', mask.size())
+    # print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-    print('the size of scores', scores.size())
+    # print('the size of scores', scores.size())
     if mask is not None:
         scores = scores.masked_fill(mask == 0, -1e9)
     p_attn = F.softmax(scores, dim=-1)
@@ -38,13 +39,22 @@ def attention_aug(query, key, value, mask=None, dropout=None):
 class MultiHeadedAttentionAug(nn.Module):
     #Unchanged
     def __init__(self, h, d_model, dropout=0.1):
-        super(MultiHeadedAttention, self).__init__()
+        # print('MultiHeadedAttentionAug class is being initialized')
+        super(MultiHeadedAttentionAug, self).__init__()
         assert d_model % h == 0
         self.d_k = d_model // h
         self.h = h
         self.linears = clones(nn.Linear(d_model, d_model), 4)
         self.attn = None
         self.dropout = nn.Dropout(p=dropout)
+        self.embeddim = 64
+        self.key_linear = nn.Linear(self.embeddim, 2*self.embeddim)
+        self.query_linear = nn.Linear(self.embeddim, 2*self.embeddim)
+        self.query2_linear = nn.Linear(self.embeddim, 2*self.embeddim)
+        self.value_linear = nn.Linear(self.embeddim, 2*self.embeddim)
+        self.elu = nn.ELU()
+        self.attention_last = nn.Linear(self.embeddim*2, 1)
+        self.attention_last2 = nn.Linear(self.embeddim*2, self.embeddim)
 
     def forward(self, query, key, value, mask=None):
         # print('forward function of MultiHeadedAttention class')
@@ -54,9 +64,28 @@ class MultiHeadedAttentionAug(nn.Module):
         query, key, value = \
             [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
              for l, x in zip(self.linears, (query, key, value))]
-
+        # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+        # print('the value of h', self.h)
         x, self.attn = attention_aug(query, key, value, mask=mask, dropout=self.dropout)
-
+        key_refine = self.key_linear(key)
+        key_refine = self.elu(key_refine)
+        query1_refine = self.query_linear(query)
+        query1_refine = self.elu(query1_refine)
+        query2_refine = self.query2_linear(query)
+        query2_refine = self.elu(query2_refine)
+        value_refine = self.value_linear(value)
+        value_refine = self.elu(value_refine)
+        if mask is None:
+            print('mask is None')
+        elif mask is not None:
+            print('mask is not None')
+        # print('after the refinement',
+        #  'query refine1 size',
+        #   query1_refine.size(),
+        #    'key size',
+        #     key_refine.size(),
+        #      'value size',
+        #       value.size())
         x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
         return self.linears[-1](x)
 
@@ -64,8 +93,8 @@ class MultiHeadedAttentionAug(nn.Module):
 class RelationalMemoryAug(nn.Module):
 
     def __init__(self, num_slots, d_model, num_heads=1):
-        super(RelationalMemory, self).__init__()
-        # print('RelationalMemory function is being called')
+        super(RelationalMemoryAug, self).__init__()
+        # print('RelationalMemoryAug function is being called')
         self.num_slots = num_slots
         self.num_heads = num_heads
         self.d_model = d_model
@@ -128,11 +157,12 @@ class EncoderDecoderAug(AttModel):
         # Different: Generator is gone 
         # only nn.Sequential(Embeddings(d_model, tgt_vocab), c(position)) is called
         # nn.Sequential(Embeddings(d_model, src_vocab), c(position)) is called
+        # print('make_model function inside EncoderDecoderAug class')
         c = copy.deepcopy
         attn = MultiHeadedAttentionAug(self.num_heads, self.d_model)
         ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
         position = PositionalEncoding(self.d_model, self.dropout)
-        rm = RelationalMemory(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
+        rm = RelationalMemoryAug(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
         model = Transformer(
             Encoder(EncoderLayer(self.d_model, c(attn), c(ff), self.dropout), self.num_layers),
             Decoder(
@@ -147,7 +177,7 @@ class EncoderDecoderAug(AttModel):
         return model
 
     def __init__(self, args, tokenizer):
-        super(EncoderDecoder, self).__init__(args, tokenizer)
+        super(EncoderDecoderAug, self).__init__(args, tokenizer)
         # print('init fucntion of EncoderDecoder class is being called')
         self.args = args
         self.num_layers = args.num_layers
@@ -213,21 +243,23 @@ class EncoderDecoderAug(AttModel):
 
 
 def attention(query, key, value, mask=None, dropout=None):
+    print('the conventional implementation')
+    print(xxx)
     # Unchanged
     d_k = query.size(-1)
-    print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+    # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
     if mask is not None:
         print('mask size', mask.size())
-    print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
+    # print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-    print('the size of scoresxxxx', scores.size())
+    # print('the size of scoresxxxx', scores.size())
     if mask is not None:
         scores = scores.masked_fill(mask == 0, -1e9)
     p_attn = F.softmax(scores, dim=-1)
-    print('p_attn', p_attn.size())
+    # print('p_attn', p_attn.size())
     if dropout is not None:
         p_attn = dropout(p_attn)
-    print('result size is', p_attn.size())
+    # print('result size is', p_attn.size())
     return torch.matmul(p_attn, value), p_attn
 
 
