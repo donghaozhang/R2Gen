@@ -110,7 +110,7 @@ def main():
     if args.model == 'r2gen':
         model = R2GenModel(args, tokenizer)
     elif args.model == 'r2genaug':
-        print('this line has been called')
+        # print('this line has been called')
         model = R2GenModelAug(args, tokenizer)
 
 
