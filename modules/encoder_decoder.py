@@ -56,11 +56,7 @@ class MultiHeadedAttentionAug(nn.Module):
         self.embed_linear = nn.Linear(self.embeddim, self.embeddim)
         self.spatial_linear = nn.Linear(self.embeddim, self.embeddim)
         self.channel_linear = nn.Linear(1, self.embeddim)
-        # self.channel_linear = nn.Linear(self.embeddim, self.embeddim)
         self.sigmoid = nn.Sigmoid()
-
-        self.attention_last = nn.Linear(self.embeddim*2, 1)
-        self.attention_last2 = nn.Linear(self.embeddim*2, self.embeddim)
         self.relu = nn.ReLU()
 
     def forward(self, query, key, value, mask=None):
@@ -82,23 +78,36 @@ class MultiHeadedAttentionAug(nn.Module):
         query1_refine = self.relu(query1_refine)
         alpha_spatial = self.spatial_linear(query1_refine)
         alpha_spatial = F.softmax(alpha_spatial)
-        print('alpha_spatial size', alpha_spatial.size())
+        # print('alpha_spatial size', alpha_spatial.size())
         alpha_channel = query1_refine.mean(-1)
-        print('the size alpha_channel', alpha_channel.size())
+        # print('the size alpha_channel', alpha_channel.size())
         alpha_channel = alpha_channel.unsqueeze(-1)
         alpha_channel = self.channel_linear(alpha_channel)
-
-
+        # print('the size of alpha_channel', alpha_channel.size())
+        # print('the size of alpha_spatial', alpha_spatial.size())
+        alpha_channel = torch.matmul(alpha_channel, key_refine.transpose(-2, -1))
+        alpha_spatial = torch.matmul(alpha_spatial, key_refine.transpose(-2, -1))
+        # print('the size of alpha_channel after key mul operation', alpha_channel.size())
+        # print('the size of alpha_spatial after key mul operation', alpha_spatial.size())
         query2_refine = self.query2_linear(query)
         query2_refine = self.elu(query2_refine)
+        # print('query2_refine size()', query2_refine.size())
         value_refine = self.value_linear(value)
         value_refine = self.elu(value_refine)
+        qv_refine = torch.matmul(query2_refine, value_refine.transpose(-2, -1))
+        # print('value_refine size()', value_refine.size())
+        # print('qv_refine size', qv_refine.size())
+        output = torch.matmul(alpha_channel * alpha_spatial * qv_refine, value)
+        print('output size is ', output.size())
+        print('x size is', x.size())
+        output = output.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
+        print('final output size is', output.size())
         d_k = query.size(-1)
-        print('d_k', d_k)
+        # print('d_k', d_k)
         scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
         # print('the size of scores', scores.size())
-        print('the size of QKt', torch.matmul(query, key.transpose(-2, -1)).size() )
-        print('the size of QKt*v', torch.matmul(torch.matmul(query, key.transpose(-2, -1)), value).size())
+        # print('the size of QKt', torch.matmul(query, key.transpose(-2, -1)).size() )
+        # print('the size of QKt*v', torch.matmul(torch.matmul(query, key.transpose(-2, -1)), value).size())
         if mask is not None:
             scores = scores.masked_fill(mask == 0, -1e9)
         att_map = F.softmax(scores, dim=-1)
@@ -106,35 +115,14 @@ class MultiHeadedAttentionAug(nn.Module):
             # print('mask is None')
             att_map_pool = att_map.mean(-2)
         elif mask is not None:
-            # print('mask is not None')
-            # print('the size of mask is', mask.size())
-            # att_mask = mask.unsqueeze(1)
-            # print('the size of att_mask is', att_mask.size())
-            # att_mask_ext = att_mask.unsqueeze(-1)
-            # print('the size of att_mask_ext is', att_mask_ext.size())
-            # print('the size of att_map is', att_map.size())
-            # print('the size of product', (att_map * mask).size())
             att_map_pool = torch.sum(att_map * mask, -2)
-        # print('the size of att_map_pool', att_map_pool.size())
-        print('the size of scores', scores.size())
-        print('the size of att_map', att_map.size())
-        # alpha_spatial = self.attention_last(att_map)
-        # alpha_channel = self.attention_last2(att_map_pool)
-        # alpha_channel = torch.sigmoid(alpha_channel)
-
-        # alpha_spatial = alpha_spatial.squeeze(-1)
-        # if att_mask is not None:
-        #     alpha_spatial = alpha_spatial.masked_fill(att_mask == 0, -1e9)
-        # alpha_spatial = F.softmax(alpha_spatial, dim=-1)
-        # print('after the refinement',
-        #  'query refine1 size',
-        #   query1_refine.size(),
-        #    'key size',
-        #     key_refine.size(),
-        #      'value size',
-        #       value.size())
+        # print('the size of scores', scores.size())
+        # print('the size of att_map', att_map.size())
+        # print('the size of x', x.size())
         x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
-        return self.linears[-1](x)
+        # print('x', x.size(), self.linears[-1](x).size(), 'self.linears[-1](x).size()', self.linears[-1](x).size())
+        # return self.linears[-1](x)
+        return self.linears[-1](output)
 
 
 class RelationalMemoryAug(nn.Module):
