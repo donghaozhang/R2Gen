@@ -18,6 +18,457 @@ def clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
 
 
+def attention_augv3(query, key, value, mask=None, dropout=None):
+    # print('attention_aug function is being called')
+    # This function is advanced version of attention proposed by X-Linear
+    d_k = query.size(-1)
+    # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+    # if mask is not None:
+    #     print('mask size', mask.size())
+    # print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
+    scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+    # print('the size of scores', scores.size())
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, -1e9)
+    p_attn = F.softmax(scores, dim=-1)
+    if dropout is not None:
+        p_attn = dropout(p_attn)
+    return torch.matmul(p_attn, value), p_attn
+
+
+class MultiHeadedAttentionAugv3(nn.Module):
+    #Unchanged
+    def __init__(self, h, d_model, dropout=0.1):
+        # print('MultiHeadedAttentionAugv2 class is being initialized')
+        super(MultiHeadedAttentionAugv3, self).__init__()
+        assert d_model % h == 0
+        self.d_k = d_model // h
+        self.h = h
+        self.linears = clones(nn.Linear(d_model, d_model), 4)
+        self.attn = None
+        self.dropout = nn.Dropout(p=dropout)
+        self.embeddim = 64
+        self.key_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.query_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.query2_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.value_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.elu = nn.ELU()
+        self.embed_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.spatial_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.channel_linear = nn.Linear(1, self.embeddim)
+        self.sigmoid = nn.Sigmoid()
+        self.relu = nn.ReLU()
+
+    def forward(self, query, key, value, mask=None):
+        # print('forward function of MultiHeadedAttention class')
+        if mask is not None:
+            mask = mask.unsqueeze(1)
+        nbatches = query.size(0)
+        query, key, value = \
+            [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
+             for l, x in zip(self.linears, (query, key, value))]
+        key_refine = self.key_linear(key)
+        key_refine = self.elu(key_refine)
+        query1_refine = self.query_linear(query)  # 
+        query1_refine = self.elu(query1_refine)
+        query1_refine = self.embed_linear(query1_refine)
+        query1_refine = self.relu(query1_refine)
+
+        query2_refine = self.query2_linear(query)
+        query2_refine = self.elu(query2_refine)
+        # print('query2_refine size()', query2_refine.size())
+        value_refine = self.value_linear(value)
+        value_refine = self.elu(value_refine)
+        qv_refine = torch.matmul(query2_refine, value_refine.transpose(-2, -1))
+        # print('value_refine size()', value_refine.size())
+        # print('qv_refine size', qv_refine.size())
+        output = torch.matmul(qv_refine, value)
+        # print('output size is ', output.size())
+        # print('x size is', x.size())
+        output = output.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
+        # print('the size of scores', scores.size())
+        # print('the size of att_map', att_map.size())
+        # print('the size of x', x.size())
+        return self.linears[-1](output)
+
+class RelationalMemoryAugv3(nn.Module):
+
+    def __init__(self, num_slots, d_model, num_heads=1):
+        super(RelationalMemoryAugv3, self).__init__()
+        # print('RelationalMemoryAug function is being called')
+        self.num_slots = num_slots
+        self.num_heads = num_heads
+        self.d_model = d_model
+
+        self.attn = MultiHeadedAttentionAugv3(num_heads, d_model)
+        self.mlp = nn.Sequential(nn.Linear(self.d_model, self.d_model),
+                                 nn.ReLU(),
+                                 nn.Linear(self.d_model, self.d_model),
+                                 nn.ReLU())
+
+        self.W = nn.Linear(self.d_model, self.d_model * 2)
+        self.U = nn.Linear(self.d_model, self.d_model * 2)
+
+    def init_memory(self, batch_size):
+        # print('init_memory function of RelationalMemory class')
+        memory = torch.stack([torch.eye(self.num_slots)] * batch_size)
+        if self.d_model > self.num_slots:
+            diff = self.d_model - self.num_slots
+            pad = torch.zeros((batch_size, self.num_slots, diff))
+            memory = torch.cat([memory, pad], -1)
+        elif self.d_model < self.num_slots:
+            memory = memory[:, :, :self.d_model]
+
+        return memory
+
+    def forward_step(self, input, memory):
+        # print('forward_step function of RelationalMemory class')
+        memory = memory.reshape(-1, self.num_slots, self.d_model)
+        q = memory
+        k = torch.cat([memory, input.unsqueeze(1)], 1)
+        v = torch.cat([memory, input.unsqueeze(1)], 1)
+        next_memory = memory + self.attn(q, k, v)
+        next_memory = next_memory + self.mlp(next_memory)
+
+        gates = self.W(input.unsqueeze(1)) + self.U(torch.tanh(memory))
+        gates = torch.split(gates, split_size_or_sections=self.d_model, dim=2)
+        input_gate, forget_gate = gates
+        input_gate = torch.sigmoid(input_gate)
+        forget_gate = torch.sigmoid(forget_gate)
+
+        next_memory = input_gate * torch.tanh(next_memory) + forget_gate * memory
+        next_memory = next_memory.reshape(-1, self.num_slots * self.d_model)
+
+        return next_memory
+
+    def forward(self, inputs, memory):
+        # print('forward function of RelationalMemory class is being called')
+        outputs = []
+        for i in range(inputs.shape[1]):
+            memory = self.forward_step(inputs[:, i], memory)
+            outputs.append(memory)
+        outputs = torch.stack(outputs, dim=1)
+
+        return outputs
+
+
+class EncoderDecoderAugv3(AttModel):
+
+    def make_model(self, tgt_vocab):
+        # Different: Generator is gone 
+        # only nn.Sequential(Embeddings(d_model, tgt_vocab), c(position)) is called
+        # nn.Sequential(Embeddings(d_model, src_vocab), c(position)) is called
+        # print('make_model function inside EncoderDecoderAug class')
+        c = copy.deepcopy
+        attn = MultiHeadedAttentionAugv3(self.num_heads, self.d_model)
+        ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
+        position = PositionalEncoding(self.d_model, self.dropout)
+        rm = RelationalMemoryAugv3(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
+        model = Transformer(
+            Encoder(EncoderLayer(self.d_model, c(attn), c(ff), self.dropout), self.num_layers),
+            Decoder(
+                DecoderLayer(self.d_model, c(attn), c(attn), c(ff), self.dropout, self.rm_num_slots, self.rm_d_model),
+                self.num_layers),
+            lambda x: x,
+            nn.Sequential(Embeddings(self.d_model, tgt_vocab), c(position)),
+            rm)
+        for p in model.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform_(p)
+        return model
+
+    def __init__(self, args, tokenizer):
+        super(EncoderDecoderAugv2, self).__init__(args, tokenizer)
+        # print('init fucntion of EncoderDecoder class is being called')
+        self.args = args
+        self.num_layers = args.num_layers
+        self.d_model = args.d_model
+        self.d_ff = args.d_ff
+        self.num_heads = args.num_heads
+        self.dropout = args.dropout
+        self.rm_num_slots = args.rm_num_slots
+        self.rm_num_heads = args.rm_num_heads
+        self.rm_d_model = args.rm_d_model
+
+        tgt_vocab = self.vocab_size + 1
+
+        self.model = self.make_model(tgt_vocab)
+        self.logit = nn.Linear(args.d_model, tgt_vocab)
+
+    def init_hidden(self, bsz):
+        return []
+
+    def _prepare_feature(self, fc_feats, att_feats, att_masks):
+
+        att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks)
+        memory = self.model.encode(att_feats, att_masks)
+
+        return fc_feats[..., :1], att_feats[..., :1], memory, att_masks
+
+    def _prepare_feature_forward(self, att_feats, att_masks=None, seq=None):
+        att_feats, att_masks = self.clip_att(att_feats, att_masks)
+        att_feats = pack_wrapper(self.att_embed, att_feats, att_masks)
+
+        if att_masks is None:
+            att_masks = att_feats.new_ones(att_feats.shape[:2], dtype=torch.long)
+        att_masks = att_masks.unsqueeze(-2)
+
+        if seq is not None:
+            # crop the last one
+            seq = seq[:, :-1]
+            seq_mask = (seq.data > 0)
+            seq_mask[:, 0] += True
+
+            seq_mask = seq_mask.unsqueeze(-2)
+            seq_mask = seq_mask & subsequent_mask(seq.size(-1)).to(seq_mask)
+        else:
+            seq_mask = None
+
+        return att_feats, seq, att_masks, seq_mask
+
+    def _forward(self, fc_feats, att_feats, seq, att_masks=None):
+        # print('_forward function of EncoderDecoder class is being called')
+        att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks, seq)
+        out = self.model(att_feats, seq, att_masks, seq_mask)
+        outputs = F.log_softmax(self.logit(out), dim=-1)
+        return outputs
+
+    def core(self, it, fc_feats_ph, att_feats_ph, memory, state, mask):
+
+        if len(state) == 0:
+            ys = it.unsqueeze(1)
+        else:
+            ys = torch.cat([state[0][0], it.unsqueeze(1)], dim=1)
+        out = self.model.decode(memory, mask, ys, subsequent_mask(ys.size(1)).to(memory.device))
+        return out[:, -1], [ys.unsqueeze(0)]
+
+
+def attention_augv2(query, key, value, mask=None, dropout=None):
+    # print('attention_aug function is being called')
+    # This function is advanced version of attention proposed by X-Linear
+    d_k = query.size(-1)
+    # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+    # if mask is not None:
+    #     print('mask size', mask.size())
+    # print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
+    scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+    # print('the size of scores', scores.size())
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, -1e9)
+    p_attn = F.softmax(scores, dim=-1)
+    if dropout is not None:
+        p_attn = dropout(p_attn)
+    return torch.matmul(p_attn, value), p_attn
+
+
+class MultiHeadedAttentionAugv2(nn.Module):
+    #Unchanged
+    def __init__(self, h, d_model, dropout=0.1):
+        # print('MultiHeadedAttentionAugv2 class is being initialized')
+        super(MultiHeadedAttentionAugv2, self).__init__()
+        assert d_model % h == 0
+        self.d_k = d_model // h
+        self.h = h
+        self.linears = clones(nn.Linear(d_model, d_model), 4)
+        self.attn = None
+        self.dropout = nn.Dropout(p=dropout)
+        self.embeddim = 64
+        self.key_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.query_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.query2_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.value_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.elu = nn.ELU()
+        self.embed_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.spatial_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.channel_linear = nn.Linear(1, self.embeddim)
+        self.sigmoid = nn.Sigmoid()
+        self.relu = nn.ReLU()
+
+    def forward(self, query, key, value, mask=None):
+        # print('forward function of MultiHeadedAttention class')
+        if mask is not None:
+            mask = mask.unsqueeze(1)
+        nbatches = query.size(0)
+        query, key, value = \
+            [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
+             for l, x in zip(self.linears, (query, key, value))]
+        key_refine = self.key_linear(key)
+        key_refine = self.elu(key_refine)
+        query1_refine = self.query_linear(query)  # 
+        query1_refine = self.elu(query1_refine)
+        query1_refine = self.embed_linear(query1_refine)
+        query1_refine = self.relu(query1_refine)
+
+        query2_refine = self.query2_linear(query)
+        query2_refine = self.elu(query2_refine)
+        # print('query2_refine size()', query2_refine.size())
+        value_refine = self.value_linear(value)
+        value_refine = self.elu(value_refine)
+        qv_refine = torch.matmul(query2_refine, value_refine.transpose(-2, -1))
+        # print('value_refine size()', value_refine.size())
+        # print('qv_refine size', qv_refine.size())
+        output = torch.matmul(qv_refine, value)
+        # print('output size is ', output.size())
+        # print('x size is', x.size())
+        output = output.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
+        # print('the size of scores', scores.size())
+        # print('the size of att_map', att_map.size())
+        # print('the size of x', x.size())
+        return self.linears[-1](output)
+
+
+class RelationalMemoryAugv2(nn.Module):
+
+    def __init__(self, num_slots, d_model, num_heads=1):
+        super(RelationalMemoryAugv2, self).__init__()
+        # print('RelationalMemoryAug function is being called')
+        self.num_slots = num_slots
+        self.num_heads = num_heads
+        self.d_model = d_model
+
+        self.attn = MultiHeadedAttentionAugv2(num_heads, d_model)
+        self.mlp = nn.Sequential(nn.Linear(self.d_model, self.d_model),
+                                 nn.ReLU(),
+                                 nn.Linear(self.d_model, self.d_model),
+                                 nn.ReLU())
+
+        self.W = nn.Linear(self.d_model, self.d_model * 2)
+        self.U = nn.Linear(self.d_model, self.d_model * 2)
+
+    def init_memory(self, batch_size):
+        # print('init_memory function of RelationalMemory class')
+        memory = torch.stack([torch.eye(self.num_slots)] * batch_size)
+        if self.d_model > self.num_slots:
+            diff = self.d_model - self.num_slots
+            pad = torch.zeros((batch_size, self.num_slots, diff))
+            memory = torch.cat([memory, pad], -1)
+        elif self.d_model < self.num_slots:
+            memory = memory[:, :, :self.d_model]
+
+        return memory
+
+    def forward_step(self, input, memory):
+        # print('forward_step function of RelationalMemory class')
+        memory = memory.reshape(-1, self.num_slots, self.d_model)
+        q = memory
+        k = torch.cat([memory, input.unsqueeze(1)], 1)
+        v = torch.cat([memory, input.unsqueeze(1)], 1)
+        next_memory = memory + self.attn(q, k, v)
+        next_memory = next_memory + self.mlp(next_memory)
+
+        gates = self.W(input.unsqueeze(1)) + self.U(torch.tanh(memory))
+        gates = torch.split(gates, split_size_or_sections=self.d_model, dim=2)
+        input_gate, forget_gate = gates
+        input_gate = torch.sigmoid(input_gate)
+        forget_gate = torch.sigmoid(forget_gate)
+
+        next_memory = input_gate * torch.tanh(next_memory) + forget_gate * memory
+        next_memory = next_memory.reshape(-1, self.num_slots * self.d_model)
+
+        return next_memory
+
+    def forward(self, inputs, memory):
+        # print('forward function of RelationalMemory class is being called')
+        outputs = []
+        for i in range(inputs.shape[1]):
+            memory = self.forward_step(inputs[:, i], memory)
+            outputs.append(memory)
+        outputs = torch.stack(outputs, dim=1)
+
+        return outputs
+
+
+class EncoderDecoderAugv2(AttModel):
+
+    def make_model(self, tgt_vocab):
+        # Different: Generator is gone 
+        # only nn.Sequential(Embeddings(d_model, tgt_vocab), c(position)) is called
+        # nn.Sequential(Embeddings(d_model, src_vocab), c(position)) is called
+        # print('make_model function inside EncoderDecoderAug class')
+        c = copy.deepcopy
+        attn = MultiHeadedAttentionAugv2(self.num_heads, self.d_model)
+        ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
+        position = PositionalEncoding(self.d_model, self.dropout)
+        rm = RelationalMemoryAugv2(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
+        model = Transformer(
+            Encoder(EncoderLayer(self.d_model, c(attn), c(ff), self.dropout), self.num_layers),
+            Decoder(
+                DecoderLayer(self.d_model, c(attn), c(attn), c(ff), self.dropout, self.rm_num_slots, self.rm_d_model),
+                self.num_layers),
+            lambda x: x,
+            nn.Sequential(Embeddings(self.d_model, tgt_vocab), c(position)),
+            rm)
+        for p in model.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform_(p)
+        return model
+
+    def __init__(self, args, tokenizer):
+        super(EncoderDecoderAugv2, self).__init__(args, tokenizer)
+        # print('init fucntion of EncoderDecoder class is being called')
+        self.args = args
+        self.num_layers = args.num_layers
+        self.d_model = args.d_model
+        self.d_ff = args.d_ff
+        self.num_heads = args.num_heads
+        self.dropout = args.dropout
+        self.rm_num_slots = args.rm_num_slots
+        self.rm_num_heads = args.rm_num_heads
+        self.rm_d_model = args.rm_d_model
+
+        tgt_vocab = self.vocab_size + 1
+
+        self.model = self.make_model(tgt_vocab)
+        self.logit = nn.Linear(args.d_model, tgt_vocab)
+
+    def init_hidden(self, bsz):
+        return []
+
+    def _prepare_feature(self, fc_feats, att_feats, att_masks):
+
+        att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks)
+        memory = self.model.encode(att_feats, att_masks)
+
+        return fc_feats[..., :1], att_feats[..., :1], memory, att_masks
+
+    def _prepare_feature_forward(self, att_feats, att_masks=None, seq=None):
+        att_feats, att_masks = self.clip_att(att_feats, att_masks)
+        att_feats = pack_wrapper(self.att_embed, att_feats, att_masks)
+
+        if att_masks is None:
+            att_masks = att_feats.new_ones(att_feats.shape[:2], dtype=torch.long)
+        att_masks = att_masks.unsqueeze(-2)
+
+        if seq is not None:
+            # crop the last one
+            seq = seq[:, :-1]
+            seq_mask = (seq.data > 0)
+            seq_mask[:, 0] += True
+
+            seq_mask = seq_mask.unsqueeze(-2)
+            seq_mask = seq_mask & subsequent_mask(seq.size(-1)).to(seq_mask)
+        else:
+            seq_mask = None
+
+        return att_feats, seq, att_masks, seq_mask
+
+    def _forward(self, fc_feats, att_feats, seq, att_masks=None):
+        # print('_forward function of EncoderDecoder class is being called')
+        att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks, seq)
+        out = self.model(att_feats, seq, att_masks, seq_mask)
+        outputs = F.log_softmax(self.logit(out), dim=-1)
+        return outputs
+
+    def core(self, it, fc_feats_ph, att_feats_ph, memory, state, mask):
+
+        if len(state) == 0:
+            ys = it.unsqueeze(1)
+        else:
+            ys = torch.cat([state[0][0], it.unsqueeze(1)], dim=1)
+        out = self.model.decode(memory, mask, ys, subsequent_mask(ys.size(1)).to(memory.device))
+        return out[:, -1], [ys.unsqueeze(0)]
+
+
 def attention_aug(query, key, value, mask=None, dropout=None):
     # print('attention_aug function is being called')
     # This function is advanced version of attention proposed by X-Linear
@@ -67,7 +518,7 @@ class MultiHeadedAttentionAug(nn.Module):
         query, key, value = \
             [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
              for l, x in zip(self.linears, (query, key, value))]
-        print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+        # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
         # print('the value of h', self.h)
         x, self.attn = attention_aug(query, key, value, mask=mask, dropout=self.dropout)
         key_refine = self.key_linear(key)
@@ -77,7 +528,7 @@ class MultiHeadedAttentionAug(nn.Module):
         query1_refine = self.embed_linear(query1_refine)
         query1_refine = self.relu(query1_refine)
         alpha_spatial = self.spatial_linear(query1_refine)
-        alpha_spatial = F.softmax(alpha_spatial)
+        alpha_spatial = F.softmax(alpha_spatial, -1)
         # print('alpha_spatial size', alpha_spatial.size())
         alpha_channel = query1_refine.mean(-1)
         # print('the size alpha_channel', alpha_channel.size())
@@ -98,10 +549,10 @@ class MultiHeadedAttentionAug(nn.Module):
         # print('value_refine size()', value_refine.size())
         # print('qv_refine size', qv_refine.size())
         output = torch.matmul(alpha_channel * alpha_spatial * qv_refine, value)
-        print('output size is ', output.size())
-        print('x size is', x.size())
+        # print('output size is ', output.size())
+        # print('x size is', x.size())
         output = output.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
-        print('final output size is', output.size())
+        # print('final output size is', output.size())
         d_k = query.size(-1)
         # print('d_k', d_k)
         scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
@@ -278,13 +729,13 @@ class EncoderDecoderAug(AttModel):
 
 
 def attention(query, key, value, mask=None, dropout=None):
-    print('the conventional implementation')
-    print(xxx)
+    # print('the conventional implementation')
+    # print(xxx)
     # Unchanged
     d_k = query.size(-1)
     # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
-    if mask is not None:
-        print('mask size', mask.size())
+    # if mask is not None:
+    #     print('mask size', mask.size())
     # print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
     # print('the size of scoresxxxx', scores.size())

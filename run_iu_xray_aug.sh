@@ -6,9 +6,9 @@ python main.py \
 --max_seq_length 60 \
 --threshold 3 \
 --batch_size 40 \
---epochs 1 \
---save_dir results/iu_xray_debugv2 \
+--epochs 200 \
+--save_dir results/iu_xray_augv2 \
 --step_size 50 \
 --gamma 0.1 \
 --n_gpu 1 \
---seed 9223
+# --seed 9223
