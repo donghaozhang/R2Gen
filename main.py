@@ -7,7 +7,7 @@ from modules.metrics import compute_scores
 from modules.optimizers import build_optimizer, build_lr_scheduler
 from modules.trainer import Trainer
 from modules.loss import compute_loss
-from models.r2gen import R2GenModel
+from models.r2gen import R2GenModel, R2GenModelMimic
 
 
 def parse_agrs():
@@ -105,8 +105,11 @@ def main():
     test_dataloader = R2DataLoader(args, tokenizer, split='test', shuffle=False)
 
     # build model architecture
-    model = R2GenModel(args, tokenizer)
-
+    if args.dataset_name == 'iu_xray':
+        model = R2GenModel(args, tokenizer)
+    elif args.dataset_name == 'mimic_cxr':
+        model = R2GenModelMimic(args, tokenizer)
+    
     # get function handles of loss and metrics
     criterion = compute_loss
     metrics = compute_scores
