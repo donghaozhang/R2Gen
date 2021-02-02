@@ -1,9 +1,0 @@
-Namespace(amsgrad=True, ann_path='data/mimic_cxr/annotation.json', batch_size=16, beam_size=3, block_trigrams=1, bos_idx=0, d_ff=512, d_model=512, d_vf=2048, dataset_name='mimic_cxr', decoding_constraint=0, drop_prob_lm=0.5, dropout=0.1, early_stop=50, eos_idx=0, epochs=30, gamma=0.8, group_size=1, image_dir='data/mimic_cxr/images/', logit_layers=1, lr_ed=0.0001, lr_scheduler='StepLR', lr_ve=5e-05, max_seq_length=100, monitor_metric='BLEU_4', monitor_mode='max', n_gpu=8, num_heads=8, num_layers=3, num_workers=2, optim='Adam', output_logsoftmax=1, pad_idx=0, record_dir='records/', resume=None, rm_d_model=512, rm_num_heads=8, rm_num_slots=3, sample_method='beam_search', sample_n=1, save_dir='results/mimic_cxr', save_period=1, seed=456789, step_size=1, temperature=1.0, threshold=10, use_bn=0, visual_extractor='resnet101', visual_extractor_pretrained=True, weight_decay=5e-05)
-Traceback (most recent call last):
-  File "main.py", line 126, in <module>
-    main()
-  File "main.py", line 100, in main
-    tokenizer = Tokenizer(args)
-  File "/fs03/bw83/donghao/R2Gen/modules/tokenizers.py", line 19, in __init__
-    self.ann = json.loads(open(self.ann_path, 'r').read())
-FileNotFoundError: [Errno 2] No such file or directory: 'data/mimic_cxr/annotation.json'
