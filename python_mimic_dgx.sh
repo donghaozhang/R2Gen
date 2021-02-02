@@ -1,0 +1,14 @@
+python main.py \
+--image_dir ../mimic_cxr_256/images/ \
+--ann_path ../mimic_cxr_256/annotation.json \
+--dataset_name mimic_cxr \
+--max_seq_length 100 \
+--threshold 10 \
+--batch_size 600 \
+--lr_ve 5e-4 \
+--epochs 30 \
+--save_dir results/mimic_cxr \
+--step_size 1 \
+--gamma 0.8 \
+--n_gpu 8 \
+--seed 456789

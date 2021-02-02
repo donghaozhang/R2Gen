@@ -1,0 +1,1000 @@
+  568  show_job
+  569  conda env list
+  570  smi
+  571  nvidia-smi
+  572  deviceQuery
+  573  show_cluster
+  574  vi test.script
+  575  sbatch test.script
+  576  vi test.script
+  577  sbatch test.script
+  578  vi test.script
+  579  sbatch test.script
+  580  show_job
+  581  cd /scratch/bw83/donghao/self-critical.pytorch
+  582  vi test.script
+  583  smux new-session --gres=gpu:K1:1 --partition=m3f
+  584  show_cluster
+  585  smux new-session --gres=gpu:K1:4 --partition=m3f
+  586  smux new-session --gres=gpu:K1:3 --partition=m3f
+  587  smux new-session --gres=gpu:P4:1 --partition=desktop
+  588  smux new-session --gres=gpu:K80:1 --partition=m3c
+  589  show_job
+  590  scancel 16747156
+  591  smux new-session --gres=gpu:P100:1 --partition=m3h
+  592  smux new-session --gres=gpu:V100:1 --partition=m3g
+  593  show_job
+  594  scancel 16747157
+  595  scancel 16747158
+  596  show_job
+  597  smux new-session --gres=gpu:V100:1 --partition=m3g
+  598  show_job
+  599  show_cluster
+  600  nvidia-smi
+  601  nvidia_smi
+  602  nvidia-smi
+  603  nvcc
+  604  show_job
+  605  bw83    | gpu:1          | gpu:K80:1      | 86476    | m3c002        | 4096                  | CANCELLED | | 16747158 |  interactive_session | dzha0062 | bw83    | gpu:1          | gpu:V100:1     | 86476    | m3g019        | 4096                  | CANCELLED |
+  606  | 16747157 |  interactive_session | dzha0062 | bw83    |                |                | 86476    | None assigned | 4096                  | CANCELLED |
+  607  | 16747159 |  interactiv
+  608  bw83    | gpu:1          | gpu:K80:1      | 86476    | m3c002        | 4096                  | CANCELLED | | 16747158 |  interactive_session | dzha0062 | bw83    | gpu:1          | gpu:V100:1     | 86476    | m3g019        | 4096                  | CANCELLED |
+  609  | 16747157 |  interactive_session | dzha0062 | bw83    |                |                | 86476    | None assigned | 4096                  | CANCELLED |
+  610  | 16747159 |  interactive_session | dzha0062 | bw83    | g
+  611  deviceQuery
+  612  module load cuda
+  613  nvidia-smi
+  614  module load anaconda/2019.03-Python3.7-gcc5
+  615  export PROJECT=bw83
+  616  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  617  source activate $CONDA_ENVS/lzh
+  618  nvidia-smi
+  619  deviceQuery
+  620  nvcc
+  621  nvcc --version
+  622  nvidia-smi
+  623  m3/profeat.sh
+  624  bash m3/profeat.sh
+  625  show_job
+  626  scancel 16747159
+  627  show_cluster
+  628  smux new-session --gres=gpu:P100:1 --partition=m3h
+  629  nvidia-smi
+  630  deviceQuery
+  631  nvcc --version
+  632  show_ob
+  633  show_job
+  634  scancel 16747162
+  635  show_cluster
+  636  show_job
+  637  show_cluster
+  638  smux new-session --gres=gpu:P4:1 --partition=desktop
+  639  smux new-session --gres=gpu:P4:1 --partition=m3f
+  640  smux new-session --gres=gpu:P4:1 --partition=m3p
+  641  smux new-session --gres=gpu:K80:1 --partition=m3c
+  642  nvidia-smi
+  643  smux list-sessions
+  644  show_job
+  645  smux why-are-we-waiting `6747`68
+  646  smux why-are-we-waiting 16747168
+  647  nvidia-smi
+  648  scancel 16747168
+  649  smux new-session --gres=gpu:K1:2 --partition=m3f
+  650  smux new-session --gres=gpu:K1:1 --partition=m3f
+  651  show_cluster
+  652  conda env list
+  653  source activate pytorch-1.0-cuda9
+  654  smux new-session --gres=gpu:K1:1 --partition=m3f
+  655  show_cluster
+  656  user_info
+  657  source activate $CONDA_ENVS/lzh
+  658  8.0conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=9.0 -c pytorch
+  659  conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=9.0 -c pytorch
+  660  smux new-session --gres=gpu:K1:1 --partition=m3f
+  661  show_job
+  662  nvidia-smi
+  663  smux list-session
+  664  smux list-sessions
+  665  smux attach-session
+  666  show_job
+  667  show_cluster
+  668  smux new-session --gres=gpu:V100:1 --partition=m3g
+  669  smux list session2
+  670  smux list-sessions
+  671  smux attach-session 16747286
+  672  user_info
+  673  conda install pytorch==1.6.0 torchvision==0.7.0 cudatoolkit=10.1 -c pytorch
+  674  smux new-session --gres=gpu:V100:1 --partition=m3g
+  675  smux list-sessions
+  676  smux attach-session 16747328
+  677  vi test.script
+  678  sbatch test.script
+  679  show_job
+  680  vi test.script
+  681  show_job
+  682  show_cluster
+  683  show_job
+  684  conda install lmdbdict
+  685  pip install lmdbdict
+  686  vi test.script
+  687  git submodule init
+  688  gt submodule update
+  689  git submodule update
+  690  cd coco-caption
+  691  bash get_stanford_models.sh
+  692  bash get_google_word2vec_model.sh
+  693  sbatch train0.script
+  694  cd ..
+  695  sbatch train0.script
+  696  vi train0.script
+  697  sbatch train0.script
+  698  show_job
+  699  show_cluster
+  700  sbatch train0.script
+  701  show_job
+  702  scancel 16747666
+  703  show_job
+  704  show_cluster
+  705  show_job
+  706  vi train0.script
+  707  show_job
+  708  scancel 16747667
+  709  show_cluster
+  710  python scripts/prepro_reference_json.py --input_json ../iu_xray/dataset_iu.json --output_json ../iu_xray/iu_eval.json
+  711  cd /scratch/bw83/donghao/self-critical.pytorch
+  712  module load anaconda/2019.03-Python3.7-gcc5
+  713  source activate $CONDA_ENVS/lzh
+  714  export PROJECT=bw83
+  715  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  716  source activate $CONDA_ENVS/lzh
+  717  show_cluster
+  718  cd /scratch/bw83/donghao/self-critical.pytorch
+  719  module load anaconda/2019.03-Python3.7-gcc5
+  720  export PROJECT=bw83
+  721  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  722  source activate $CONDA_ENVS/lzh
+  723  git pull origin retina_translate
+  724  sbatch train0.script
+  725  show_job
+  726  show_cluster
+  727  show_job
+  728  cd /scratch/bw83/donghao/self-critical.pytorch
+  729  vi train0.script
+  730  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  731  source activate $CONDA_ENVS/lzh
+  732  module load anaconda/2019.03-Python3.7-gcc5
+  733  export PROJECT=bw83
+  734  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  735  source activate $CONDA_ENVS/lzh
+  736  conda list board
+  737  conda list torch
+  738  conda install tensorboard
+  739  cd /scratch/bw83/donghao/self-critical.pytorch
+  740  module load anaconda/2019.03-Python3.7-gcc5
+  741  export PROJECT=bw83
+  742  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  743  source activate $CONDA_ENVS/lzh
+  744  conda install tensorboard
+  745  ls
+  746  cd /scratch/bw83/donghao/self-critical.pytorch
+  747  module load anaconda/2019.03-Python3.7-gcc5
+  748  source activate $CONDA_ENVS/lzh
+  749  export PROJECT=bw83
+  750  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  751  source activate $CONDA_ENVS/lzh
+  752  conda list tensor
+  753  user_info
+  754  show_cluster
+  755  smux new-session --gres=gpu:K80:1 --partition=m3c
+  756  smux new-session --gres=gpu:K80:2 --partition=m3c
+  757  show_job
+  758  scancel 16756820
+  759  show_cluster
+  760  smux new-session --gres=gpu:K80:4 --partition=m3c
+  761  smux new-session --gres=gpu:K80:8 --partition=m3c
+  762  show_job
+  763  smux list-sessions
+  764  show_job
+  765  scancel 16756842
+  766  show_cluster
+  767  smux new-session --gres=gpu:V100:1 --partition=dgx
+  768  smux new-session --gres=gpu:V100:1 --partition=m3g
+  769  vi m3/train0.py
+  770  vi m3/train0.sh
+  771  smux new-session --gres=gpu:V100:1 --partition=m3g
+  772  sbatch train0.script
+  773  show_job
+  774  vi train0.script
+  775  sbatch train0.script
+  776  show_job
+  777  git commit -a -m "from m3"
+  778  git config --global zhihonglin90@gmail.com
+  779  git config --global user.email  zhihonglin90@gmail.com
+  780  git config --global user.name "linzh"
+  781  git commit --amend --reset-author
+  782  git commit -a -m "from m3"
+  783  git add train0.script
+  784  git add test.script
+  785  git push origin retina_translate
+  786  git push origin:retina_translate
+  787  git condig
+  788  git config help
+  789  git config 
+  790  git push origin retina_translate
+  791  git show-ref
+  792  git commit -m "initial commit"
+  793  git push origin retina_translate
+  794  git branch
+  795  git checkout -b retina_translate
+  796  git push origin retina_translate
+  797  cd ..
+  798  git clone https://github.com/donghaozhang/R2Gen.git
+  799  show_job
+  800  pip install pyemd
+  801  cd /scratch/bw83/donghao/self-critical.pytorch
+  802  vi train0.script
+  803  sbatch train0.script
+  804  show_job
+  805  show_cluster
+  806  show_job
+  807  scancel 16765791
+  808  vi train0.script
+  809  sbatch train0.script
+  810  show_job
+  811  vi train0.script
+  812  show_job
+  813  cd .. 
+  814  cd R2Gen
+  815  ls
+  816  git pull origin main
+  817  sbatch train0.script
+  818  sbatch train0.script
+  819  vi train0.ecript
+  820  vi train0.script
+  821  show_job
+  822  sbatch train0.script
+  823  show_job
+  824  ls
+  825  show_job
+  826  show_cluster
+  827  show_job
+  828  cd /scratch/bw83/donghao/self-critical.pytorch
+  829  module load anaconda/2019.03-Python3.7-gcc5
+  830  export PROJECT=bw83
+  831  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  832  source activate $CONDA_ENVS/lzh
+  833  sbatch train1.script
+  834  git pull origin retina_translate
+  835  git branch
+  836  git pull origin retina_translate -f
+  837  git pull --help
+  838  git pull origin retina_translate
+  839  sbatch train1.script
+  840  sbatch train2.script
+  841  vi train3.script
+  842  sbatch train3.script
+  843  show_job
+  844  show_cluster
+  845  cd /scratch/bw83/donghao/self-critical.pytorch
+  846  cd ..
+  847  cd R2Gen
+  848  ls
+  849  module load anaconda/2019.03-Python3.7-gcc5
+  850  export PROJECT=bw83
+  851  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  852  source activate $CONDA_ENVS/lzh
+  853  sbatch train0.script
+  854  show_job
+  855  cd /scratch/bw83/donghao/self-critical.pytorch
+  856  module load anaconda/2019.03-Python3.7-gcc5
+  857  export PROJECT=bw83
+  858  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  859  source activate $CONDA_ENVS/lzh
+  860  smux new-session --gres=gpu:V100:1 --partition=m3g
+  861  python tools/eval.py --dump_images 0 --num_images 5000 --model logs/iu_a2i2v2/model-best.pth --infos_path infos.pkl --language_eval 1 
+  862  export SC=/scratch/bw83/donghao/self-critical.pytorch
+  863  python tools/eval.py --dump_images 0 --num_images 5000 --model logs/iu_a2i2v2/model-best.pth --infos_path infos.pkl --language_eval 1 
+  864  vi tools/eval.py
+  865  python tools/eval.py --dump_images 0 --num_images 5000 --model logs/iu_a2i2v2/model-best.pth --infos_path infos.pkl --language_eval 1 
+  866  vi tools/eval.py
+  867  python tools/eval.py --dump_images 0 --num_images 5000 --model logs/iu_a2i2v2/model-best.pth --infos_path infos.pkl --language_eval 1 
+  868  python tools/eval.py --dump_images 0 --num_images 5000 --model logs/iu_a2i2v2/model-best.pth --infos_path logs/iu_a2i2v2/infos.pkl --language_eval 1 
+  869  python tools/eval.py --dump_images 0 --num_images 5000 --model logs/iu_a2i2v2/model-best.pth --infos_path logs/iu_a2i2v2/infos_a2i2-best.pkl --language_eval 1 
+  870  module load cuda
+  871  python tools/eval.py --dump_images 0 --num_images 5000 --model logs/iu_a2i2v2/model-best.pth --infos_path logs/iu_a2i2v2/infos_a2i2-best.pkl --language_eval 1 
+  872  smux list sessions
+  873  smux list-sessions
+  874  smux attach-session 16853386
+  875  smux new-session --gres=gpu:V100:1 --partition=m3g
+  876  smux list-sessions
+  877  show_job
+  878  show_cluster
+  879  show_job
+  880  smux list-sessions
+  881  show_job
+  882  cd /scratch/bw83/donghao/self-critical.pytorch
+  883  module load anaconda/2019.03-Python3.7-gcc5
+  884  export PROJECT=bw83
+  885  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  886  source activate $CONDA_ENVS/lzh
+  887  show_job
+  888  smux list-session
+  889  smux list-sessions
+  890  show_job
+  891  smux list-sessions
+  892  cd ../r2Gen
+  893  cd ../R2Gen
+  894  ls
+  895  sbatch train0.script
+  896  show_joob
+  897  show_job
+  898  user_info
+  899  show_job
+  900  show_cluster
+  901  show_job
+  902  user_info
+  903  show_job
+  904  scancel 16867191
+  905  show_job
+  906  scancel 16856730
+  907  cd /scratch/bw83/donghao/self-critical.pytorch
+  908  module load anaconda/2019.03-Python3.7-gcc5
+  909  export PROJECT=bw83
+  910  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+  911  source activate $CONDA_ENVS/lzh
+  912  cd ../R2Gen
+  913  sbatch train0.script
+  914  show_job
+  915  squeue
+  916  show_job
+  917  ls
+  918  cd bw83
+  919  ls
+  920  cd donghao/
+  921  ls
+  922  cd image_caption/
+  923  ls
+  924  cd repos/
+  925  ls
+  926  cd ..
+  927  history
+  928  show_cluster
+  929  history
+  930  user_info
+  931  cd scratch
+  932  cd /scratch/bw83/donghao/self-critical.pytorch
+  933  ls
+  934  cat slurm-16
+  935  cat train3.script 
+  936  show_job
+  937  cat slurm-16800270.out 
+  938  cd logs/
+  939  ls
+  940  cd ..
+  941  ls
+  942  cat output_tf.txt
+  943  ls
+  944  cd ..
+  945  ls
+  946  cd R2Gen/
+  947  ls
+  948  cat slurm-16800661.out 
+  949  ls
+  950  show_job
+  951  ls
+  952  cat slurm-16800661.out
+  953  history
+  954  ls
+  955  vim train0.script 
+  956  cat train0.script
+  957  cat output.txt 
+  958  ls
+  959  show_job
+  960  ls
+  961  cd re
+  962  cd result
+  963  ls
+  964  cd ..
+  965  cd results/
+  966  ls
+  967  cd ..
+  968  smux new-session --gres=gpu:V100:1 --partition=m3g
+  969  smux list-sessions
+  970  smux attach-session 16921438
+  971  smux why-are-we-waiting 16921438
+  972  ls
+  973  sbatch train0.script
+  974  show_job
+  975  sbatch train0.script
+  976  show_job
+  977  cat train0.script 
+  978  ls
+  979  cat run_mimic_cxr.sh 
+  980  ls
+  981  cat train0.script 
+  982  show_job
+  983  ls
+  984  cp train0.script train_mimic.sh
+  985  vim train_mimic.sh 
+  986  sbatch train_mimic.sh 
+  987  show_job
+  988  scancel 16921438
+  989  show_job
+  990  scancel 16922000
+  991  scancel 16922049
+  992  show_job
+  993  help
+  994  logout
+  995  show_cluster
+  996  squeue
+  997  squeue | dgx
+  998  squeue | grep dgx
+  999  squeue | grep m3g
+ 1000  logout
+ 1001  show_job
+ 1002  show_job 16922736
+ 1003  squeue
+ 1004  squeue --help
+ 1005  squeue --user dzha0062
+ 1006  show_job
+ 1007  squeue --user dzha0062
+ 1008  squeue | grep m3g
+ 1009  squeue | grep dgx
+ 1010  logout
+ 1011  show_cluster
+ 1012  show_job
+ 1013  history
+ 1014  cd /scratch/bw83/donghao
+ 1015  ls
+ 1016  cd R2Gen/
+ 1017  ls
+ 1018  ls -lst
+ 1019  cd models/
+ 1020  ls
+ 1021  cd ..
+ 1022  cd result
+ 1023  ls
+ 1024  cd ..
+ 1025  cat slurm-16922736.out
+ 1026  ls
+ 1027  ls -lst
+ 1028  cat output.txt 
+ 1029  cat slurm-16878584.out
+ 1030  cat slurm-16800661.out
+ 1031  ls
+ 1032  cd 
+ 1033  ls
+ 1034  cat slurm-15243892.out
+ 1035  show_job
+ 1036  ls
+ 1037  cd bw83_scratch/
+ 1038  ls
+ 1039  cd donghao/
+ 1040  ls
+ 1041  cd R2Gen/
+ 1042  ls
+ 1043  ls -lst
+ 1044  cat train0.script
+ 1045  cd ..
+ 1046  ls
+ 1047  cd self-critical.pytorch/
+ 1048  ls
+ 1049  ls -lst
+ 1050  cat train3.script
+ 1051  cd logs/
+ 1052  ls
+ 1053  cd iu_aoa/
+ 1054  ls
+ 1055  cd ..
+ 1056  history
+ 1057  module load anaconda/2019.03-Python3.7-gcc5
+ 1058  export PROJECT=bw83
+ 1059  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1060  source activate $CONDA_ENVS/lzh
+ 1061  nvidia-smi
+ 1062  module load cuda
+ 1063  nvidia-smi
+ 1064  ls
+ 1065  cd R2Gen/
+ 1066  ls
+ 1067  pwd
+ 1068  ls
+ 1069  pwd
+ 1070  ls -lst
+ 1071  pwd
+ 1072  ls
+ 1073  sbatch train_mimic.sh
+ 1074  squeue | grep dzha0062
+ 1075  squeue m3g
+ 1076  squeue | grep m3g
+ 1077  show_job
+ 1078  ls
+ 1079  sbatch train_mimic.sh
+ 1080  squeue | grep m3g
+ 1081  show_job
+ 1082  sbatch train_mimic.sh
+ 1083  show_job
+ 1084  cluster_show
+ 1085  logout
+ 1086  show_cluster
+ 1087  show_job
+ 1088  scancel 16932323
+ 1089  show_job
+ 1090  logout
+ 1091  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1092  module load anaconda/2019.03-Python3.7-gcc5
+ 1093  export PROJECT=bw83
+ 1094  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1095  source activate $CONDA_ENVS/lzh
+ 1096  show_job
+ 1097  smux list-sessions
+ 1098  conda env list
+ 1099  show_cluster
+ 1100  smux new-session --gres=gpu:V100:1 --partition=m3g
+ 1101  show_cluster
+ 1102  show_job
+ 1103  smux list-sessions
+ 1104  smux attach-session 16970323
+ 1105  show_job
+ 1106  sbatch eval0.script
+ 1107  show_job
+ 1108  sbatch eval1.script
+ 1109  sbatch eval2.script
+ 1110  sbatch eval3.script
+ 1111  show_job
+ 1112  vi eval0.script
+ 1113  sbatch eval0.script
+ 1114  vi eval0.script
+ 1115  show_job
+ 1116  vi eval0.script
+ 1117  sbatch eval0.script
+ 1118  vi eval0.script
+ 1119  show_job
+ 1120  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1121  module load anaconda/2019.03-Python3.7-gcc5
+ 1122  export PROJECT=bw83
+ 1123  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1124  source activate $CONDA_ENVS/lzh
+ 1125  vi eval3.script
+ 1126  sbatch eval3.script
+ 1127  show_job
+ 1128  sbatch eval0.script
+ 1129  show_job
+ 1130  sbatch dgx_eval.script
+ 1131  vi dgx_eval.script
+ 1132  sbatch dgx_eval.script
+ 1133  vi dgx_eval.script
+ 1134  sbatch dgx_eval.script
+ 1135  show_job
+ 1136  sbatch dgx_eval.script
+ 1137  show_job
+ 1138  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1139  module load anaconda/2019.03-Python3.7-gcc5
+ 1140  export PROJECT=bw83
+ 1141  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1142  source activate $CONDA_ENVS/lzh
+ 1143  sbatch eval3.script
+ 1144  show_job
+ 1145  vi eval0.script
+ 1146  sbatch eval0.script
+ 1147  show_job
+ 1148  vi eval0.script
+ 1149  show_job
+ 1150  sbatch eval4.script
+ 1151  show_job
+ 1152  vi eval4.script
+ 1153  sbatch eval4.script
+ 1154  show_job
+ 1155  vi eval4.script
+ 1156  smux new-session --gres=gpu:V100:1 --partition=m3g --mem-per-cpu=16384
+ 1157  smux -h
+ 1158  smux n -h
+ 1159  smux new-session --gres=gpu:V100:1 --partition=m3g --mem=16384
+ 1160  show_job
+ 1161  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1162  module load anaconda/2019.03-Python3.7-gcc5
+ 1163  export PROJECT=bw83
+ 1164  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1165  source activate $CONDA_ENVS/lzh
+ 1166  vi dgx_eval.script
+ 1167  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1168  module load anaconda/2019.03-Python3.7-gcc5
+ 1169  export PROJECT=bw83
+ 1170  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1171  source activate $CONDA_ENVS/lzh
+ 1172  sbatch dgx_eval.script
+ 1173  vi dgx_eval.script
+ 1174  sbatch dgx_eval.script
+ 1175  vi .gitingore
+ 1176  python scripts/prepro_labels.py --input_json ../mimic_cxr_256/dataset_m256.json --output_json ../mimic_cxr_256/m256_talk.json --output_h5 ../mimic_cxr_256/m256
+ 1177  vi m3/profeat.script
+ 1178  sbatch m3/profeat.script
+ 1179  show_job
+ 1180  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1181  module load anaconda/2019.03-Python3.7-gcc5
+ 1182  export PROJECT=bw83
+ 1183  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1184  source activate $CONDA_ENVS/lzh
+ 1185  show_job
+ 1186  python scripts/prepro_labels.py --input_json ../mimic_cxr_256/dataset_m256.json --output_json ../mimic_cxr_256/m256_talk.json --output_h5 ../mimic_cxr_256/m256
+ 1187  python scripts/prepro_labels.py --input_json ../mimic_cxr_256/dataset_m256.json --output_json ../mimic_cxr_256/m256_talk.json --output_h5 ../mimic_cxr_256/m256 --max_length 100
+ 1188  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1189  module load anaconda/2019.03-Python3.7-gcc5
+ 1190  export PROJECT=bw83
+ 1191  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1192  source activate $CONDA_ENVS/lzh
+ 1193  python scripts/prepro_labels.py --input_json ../mimic_cxr_256/dataset_m256.json --output_json ../mimic_cxr_256/m256_talk.json --output_h5 ../mimic_cxr_256/m256 --max_length 100 --word_count_threshold 10
+ 1194  git pull origin retina_translate
+ 1195  git pull origin retina_translate -f
+ 1196  git add --all
+ 1197  git commit -a -m "m3 works"
+ 1198  vi .gitignore
+ 1199  git commit -a -m "m3 works"
+ 1200  git add --all
+ 1201  git commit -a -m "m3 works"
+ 1202  git pull origin retina_translate
+ 1203  git push orogin retina_translate
+ 1204  git push origin retina_translate
+ 1205  git pull origin retina_translate
+ 1206  git commit -a -m "m3 works"
+ 1207  git add --all
+ 1208  git commit -a -m "m3 works"
+ 1209  git pull origin retina_translate
+ 1210  git push origin retina_translate
+ 1211  vi .gitignore
+ 1212  git rm vis/img
+ 1213  git rm vis/img/*
+ 1214  git rm -r vis/img/*
+ 1215  git rm -r vis/img
+ 1216  git rm -r vis/img/
+ 1217  git rm -r ./vis/img/
+ 1218  git rm -r ./vis/img
+ 1219  git rm -r ./vis/imgs
+ 1220  git commit -a -m "rm imgs"
+ 1221  git push origin retina_translate
+ 1222  vi .gitignore
+ 1223  python scripts/prepro_labels.py --input_json ../iu_xray/dataset_iu.json --output_json ../iu_xray/iu_talk.json --output_h5 ../iu_xray/iu --max_length 60 --word_count_threshold 3
+ 1224  vi m3/iu_a2i2.script
+ 1225  vi config iu_a2i2.yml
+ 1226  vi config/iu_a2i2.yml
+ 1227  vi configs/iu_a2i2.yml
+ 1228  vi m3/iu_a2i2.script
+ 1229  cd logs
+ 1230  ls
+ 1231  rm -rf iu_a2i2v2
+ 1232  rm -rf iu_aoa
+ 1233  rm -rf iu_fc
+ 1234  rm -rf iu_tfv2
+ 1235  ls
+ 1236  ls m3
+ 1237  cd ..
+ 1238  cd m3
+ 1239  ls
+ 1240  cd ..
+ 1241  sbatch iu_a2i2.script
+ 1242  sbatch m3iu_a2i2.script
+ 1243  sbatch m3/iu_a2i2.script
+ 1244  vi m3/iu_a2i2.script
+ 1245  sbatch m3/iu_a2i2.script
+ 1246  show_job
+ 1247  vi m3/iu_a2i2.script
+ 1248  show_job
+ 1249  python scripts/prepro_labels.py --input_json ../mimic_cxr_256/dataset_m256.json --output_json ../mimic_cxr_256/m256_talk.json --output_h5 ../mimic_cxr_256/m256 --max_length 100 --word_count_threshold 10
+ 1250  vi m3/profeat.script
+ 1251  sbatch m3/profeat.script
+ 1252  show_job
+ 1253  vi configs/iu_a2i2.yml
+ 1254  show_job
+ 1255  vi configs/iu_aoa.yml
+ 1256  vi configs/iu_fc.yml
+ 1257  vi configs/iu_tf.yml
+ 1258  cd me
+ 1259  cd m3
+ 1260  ls
+ 1261  cp  iu_a2i2.script  iu_aoa.script
+ 1262  cp  iu_a2i2.script  iu_fc.script
+ 1263  cp  iu_a2i2.script  iu_tf.script
+ 1264  vi iu_fc
+ 1265  vi iu_fc.script
+ 1266  vi iu_tfv2.script
+ 1267  vi iu_tf.script
+ 1268  cd ..
+ 1269  sbatch m3/iu_aoa.script
+ 1270  sbatch m3/iu_fc.script
+ 1271  sbatch m3/iu_tf.script
+ 1272  show_job
+ 1273  show_job
+ 1274  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1275  module load anaconda/2019.03-Python3.7-gcc5
+ 1276  export PROJECT=bw83
+ 1277  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1278  source activate $CONDA_ENVS/lzh
+ 1279  show_job
+ 1280  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1281  module load anaconda/2019.03-Python3.7-gcc5
+ 1282  export PROJECT=bw83
+ 1283  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1284  source activate $CONDA_ENVS/lzh
+ 1285  vi m3/iu_a2i2.script
+ 1286  sbatch m3/iu_a2i2.script
+ 1287  show_job
+ 1288  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1289  module load anaconda/2019.03-Python3.7-gcc5
+ 1290  export PROJECT=bw83
+ 1291  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1292  source activate $CONDA_ENVS/lzh
+ 1293  vi m3/evals.script
+ 1294  show_job
+ 1295  vi m3/evals.script
+ 1296  show_job
+ 1297  vi m3/eval_a2i2v2.script
+ 1298  vi m3/eval_a2i2.script
+ 1299  cp m3/iu0/eval0.script m3/eval0.script
+ 1300  cp m3/iu0/eval1.script m3/eval1.script
+ 1301  cp m3/iu0/eval2.script m3/eval2.script
+ 1302  cp m3/iu0/eval3.script m3/eval3.script
+ 1303  vi m3/eval0.script
+ 1304  sbatch m3/eval0.script
+ 1305  vi m3/eval1.script
+ 1306  sbatch m3/eval1.script
+ 1307  vi m3/eval2.script
+ 1308  sbatch m3/eval2.script
+ 1309  vi m3/eval3.script
+ 1310  sbatch m3/eval2.script
+ 1311  sbatch m3/eval3.script
+ 1312  show_job
+ 1313  scancel 17005761
+ 1314  show_job
+ 1315  scancel 17005762
+ 1316  show_job
+ 1317  vi m3/eval2.script
+ 1318  vi m3/eval1.script
+ 1319  show_job
+ 1320  vi eval_aoa.txt
+ 1321  vi eval_fc.txt
+ 1322  show_job
+ 1323  cp m3/iu_a2i2.script m3/iu_a2i2_sc.script
+ 1324  vi m3/iu_a2i2_sc.script
+ 1325  sbatch m3/iu_a2i2_sc.script
+ 1326  show_job
+ 1327  sbatch dgx_eval.script
+ 1328  vi dgx_eval.script
+ 1329  show_job
+ 1330  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1331  vi m3/iu_a2i2_sc.script
+ 1332  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1333  module load anaconda/2019.03-Python3.7-gcc5
+ 1334  export PROJECT=bw83
+ 1335  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1336  source activate $CONDA_ENVS/lzh
+ 1337  ls
+ 1338  sbatch dgx_eval.script
+ 1339  vi dgx_eval.script
+ 1340  ls m3/
+ 1341  cp m3/iu_a2i2_sc.script m3/iu_sceval.script 
+ 1342  vi m3/iu_sceval.script
+ 1343  sbatch m3/iU_sceval.script
+ 1344  sbatch m3/iu_sceval.script
+ 1345  show_job
+ 1346  show_cluster
+ 1347  user_info
+ 1348  cd tw86
+ 1349  ls
+ 1350  cd
+ 1351  ls
+ 1352  cd bw83
+ 1353  ls
+ 1354  cd /
+ 1355  cd scratch/
+ 1356  cd bw83/
+ 1357  ls
+ 1358  cd donghao/
+ 1359  ls
+ 1360  chmod zlin u+w R2Gen
+ 1361  chmod
+ 1362  chmod R2Gen 777
+ 1363  chmod R2Gen/ 777
+ 1364  chmod --help
+ 1365  chmod 777 R2Gen/
+ 1366  chmod -R 777 R2Gen/
+ 1367  show_job
+ 1368  ls
+ 1369  cd self-critical.pytorch/
+ 1370  ls
+ 1371  cat dgx_eval.script 
+ 1372  sbatch dgx_eval.script
+ 1373  pwd
+ 1374  sbatch dgx_eval.script
+ 1375  cp dgx_eval.script dgx_eval.sh
+ 1376  vim dgx_eval.sh 
+ 1377  sbatch dgx_eval.sh
+ 1378  sbatch search.script 
+ 1379  cd /
+ 1380  cd projects/
+ 1381  ls
+ 1382  cd ub62/
+ 1383  ls
+ 1384  chmod -R imcaption/
+ 1385  chmod 777 -R imcaption/
+ 1386  ls
+ 1387  cd /
+ 1388  ls
+ 1389  cd home/
+ 1390  ls
+ 1391  cd /
+ 1392  cd scratch/
+ 1393  ls
+ 1394  cd bw84
+ 1395  ls
+ 1396  cd bw83/
+ 1397  ls
+ 1398  cd donghao/
+ 1399  ls
+ 1400  cd R2Gen/`
+ 1401  cd R2Gen/
+ 1402  ls
+ 1403  show_job
+ 1404  ls
+ 1405  sbatch train_mimic_dgx.sh 
+ 1406  show_job
+ 1407  ls
+ 1408  cat slurm-17027537.out
+ 1409  sbatch train_mimic_dgx.sh 
+ 1410  show_job
+ 1411  show_cluster
+ 1412  show_job
+ 1413  ls
+ 1414  cat slurm-17027543.out
+ 1415  show_job
+ 1416  cat slurm-17027543.out
+ 1417  show_job
+ 1418  logout
+ 1419  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1420  module load anaconda/2019.03-Python3.7-gcc5
+ 1421  export PROJECT=bw83
+ 1422  export CONDA_ENVS=/projects/$PROJECT/$USER/conda_envs
+ 1423  source activate $CONDA_ENVS/lzh
+ 1424  conda list torch
+ 1425  conda list cuda
+ 1426  conda list tensor
+ 1427  pip install h5py
+ 1428  pip install gensim
+ 1429  conda list
+ 1430  user_info
+ 1431  ls
+ 1432  cp m3 /home/dzha0062/m3
+ 1433  cp m3 /home/dzha0062/m3 -r
+ 1434  cd /home/dzha0062/m3
+ 1435  ls
+ 1436  cp ..
+ 1437  cd ..
+ 1438  cd /projects/ub62
+ 1439  ls
+ 1440  ls -ld self=critical.pytorch
+ 1441  ls -ld self-critical.pytorch
+ 1442  show_job
+ 1443  cd /scratch/bw83/donghao/self-critical.pytorch
+ 1444  module load anaconda/2019.03-Python3.7-gcc5
+ 1445  export CONDA_ENVS=/projects/ub62/$USER/conda_envs
+ 1446  source activate $CONDA_ENVS/lzh
+ 1447  vi m3/profeat.script
+ 1448  vi scripts/prepro_feats.py
+ 1449  vi .gitignore
+ 1450  git push origin retina_translate
+ 1451  git commit -a -m "update"
+ 1452  git push origin retina_translate
+ 1453  show_job
+ 1454  module avail | grep cuda
+ 1455  show_job
+ 1456  history
+ 1457  show_job
+ 1458  show_cluster
+ 1459  show_job
+ 1460  show_job 17027543
+ 1461  ls
+ 1462  scancel 17027543
+ 1463  show_job
+ 1464  show_cluster
+ 1465  ls
+ 1466  ccd ub62
+ 1467  ls
+ 1468  cd /
+ 1469  cd projects/
+ 1470  ls
+ 1471  cd ub62
+ 1472  ls
+ 1473  cd zlin/
+ 1474  ls
+ 1475  logout
+ 1476  ls
+ 1477  cd bw83_scratch/
+ 1478  ls
+ 1479  cd donghao/
+ 1480  ls
+ 1481  cd R2Gen/
+ 1482  git status
+ 1483  git diff pycocoevalcap/tokenizer/__init__.py
+ 1484  git diff modules/tokenizers.py
+ 1485  git diff understand_dataset.py
+ 1486  git pull
+ 1487  git add .
+ 1488  ls
+ 1489  cd.
+ 1490  cd ..
+ 1491  ls
+ 1492  git clone https://github.com/donghaozhang/R2Gen.git
+ 1493  cd R2Gen
+ 1494  ls
+ 1495  git status
+ 1496  cd ..
+ 1497  ls
+ 1498  cd R2Gen
+ 1499  ls
+ 1500  sbatch train_iuxray_dgx.sh 
+ 1501  show_job
+ 1502  show_cluster
+ 1503  show_job
+ 1504  ls
+ 1505  cat slurm-17041133.out 
+ 1506  show_job
+ 1507  cat slurm-17041133.out 
+ 1508  sbatch train_iuxray_dgx.sh 
+ 1509  show_job
+ 1510  ls
+ 1511  cat slurm-17041146.out
+ 1512  sbatch train_iuxray_dgx.sh 
+ 1513  show_job
+ 1514  ls
+ 1515  cat slurm-17041159.out
+ 1516  show_job
+ 1517  cd ..
+ 1518  cd R2Gen
+ 1519  ls
+ 1520  show_job
+ 1521  ls
+ 1522  cat slurm-17041159.out
+ 1523  show_job
+ 1524  cat slurm-17041159.out
+ 1525  scancel 17041159
+ 1526  cat slurm-17041159.out
+ 1527  show_job
+ 1528  cd ..
+ 1529  mkdir R2Gen_official
+ 1530  cd R2Gen_official/
+ 1531  ls
+ 1532  git clone https://github.com/cuhksz-nlp/R2Gen.git
+ 1533  cd R2Gen/
+ 1534  sbatch train_iuxray_dgx.sh 
+ 1535  show_job
+ 1536  show_job 17041185
+ 1537  scancel
+ 1538  scancel 17041185
+ 1539  sbatch train_iuxray_dgx.sh 
+ 1540  show_job
+ 1541  cd ..
+ 1542  ls
+ 1543  cd R2Gen
+ 1544  git status
+ 1545  pwd
+ 1546  sbtach hpc_iuxray_dgx.sh 
+ 1547  sbatch hpc_iuxray_dgx.sh 
+ 1548  show_job
+ 1549  git status
+ 1550  show_job
+ 1551  show_cluster
+ 1552  pwd
+ 1553  sbatch hpc_iuxray_m3g.sh
+ 1554  show_cluster
+ 1555  show_job
+ 1556  module avail
+ 1557  show_job
+ 1558  module load anaconda/2019.03-Python3.7-gcc5
+ 1559  source activate /projects/bw83/dzha0062/conda_envs/lzh
+ 1560  which python
+ 1561  python
+ 1562  ls
+ 1563  cat slurm-17042220.out
+ 1564  conda deactivate
+ 1565  module avail
+ 1566  history
+ 1567  history >> history.txt

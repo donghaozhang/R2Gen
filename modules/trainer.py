@@ -191,14 +191,19 @@ class Trainer(BaseTrainer):
         self.test_dataloader = test_dataloader
 
     def _train_epoch(self, epoch):
-
+        start_time = time.time()
         train_loss = 0
         self.model.train()
         for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.train_dataloader):
             images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), reports_masks.to(
                 self.device)
             # print('self.device', self.device)
-            output = self.model(images, reports_ids, mode='train')
+            # print('images.size()', images.size())
+            model_dict = {}
+            model_dict['mode'] = 'train'
+            model_dict['images'] = images
+            model_dict['targets'] = reports_ids
+            output = self.model(model_dict)
             # print('output size is', output.size(), 'report_ids', reports_ids.size(), 'reports_masks', reports_masks.size())
             loss = self.criterion(output, reports_ids, reports_masks)
             train_loss += loss.item()
@@ -206,8 +211,12 @@ class Trainer(BaseTrainer):
             loss.backward()
             torch.nn.utils.clip_grad_value_(self.model.parameters(), 0.1)
             self.optimizer.step()
+            # os.system('nvidia-smi')
         log = {'train_loss': train_loss / len(self.train_dataloader)}
+        elapsed_time = time.time() - start_time
+        print('time for training one epoch', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
+        start_time = time.time()
         self.model.eval()
         with torch.no_grad():
             val_gts, val_res = [], []
@@ -215,7 +224,12 @@ class Trainer(BaseTrainer):
             for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.val_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
-                output = self.model(images, mode='sample')
+                model_dict = {}
+                model_dict['mode'] = 'sample'
+                model_dict['images'] = images
+                model_dict['targets'] = reports_ids
+                output = self.model(model_dict)
+                # output = self.model(images, mode='sample')
                 # print('output size is', output.size())
                 # print(self.model.__dict__)
                 reports = self.val_dataloader.tokenizer.decode_batch(output.cpu().numpy())
@@ -227,7 +241,11 @@ class Trainer(BaseTrainer):
             val_met = self.metric_ftns({i: [gt] for i, gt in enumerate(val_gts)},
                                        {i: [re] for i, re in enumerate(val_res)})
             log.update(**{'val_' + k: v for k, v in val_met.items()})
+        elapsed_time = time.time() - start_time
+        print('time for validating one epoch', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
+
+        start_time = time.time()
         self.model.eval()
         with torch.no_grad():
             test_gts, test_res = [], []
@@ -235,7 +253,12 @@ class Trainer(BaseTrainer):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
                 # images, reports_ids, reports_masks = images.cuda(), reports_ids.cuda(), reports_masks.cuda()
-                output = self.model(images, mode='sample')
+                model_dict = {}
+                model_dict['mode'] = 'sample'
+                model_dict['images'] = images
+                model_dict['targets'] = reports_ids
+                output = self.model(model_dict)
+                # output = self.model(images, mode='sample')
                 #print(self.model.)
                 reports = self.test_dataloader.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.test_dataloader.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
@@ -244,6 +267,8 @@ class Trainer(BaseTrainer):
             test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
                                         {i: [re] for i, re in enumerate(test_res)})
             log.update(**{'test_' + k: v for k, v in test_met.items()})
+        elapsed_time = time.time() - start_time
+        print('time for testing one epoch', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
         self.lr_scheduler.step()
 

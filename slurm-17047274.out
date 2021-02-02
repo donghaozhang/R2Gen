@@ -1,0 +1,4 @@
+  File "main.py", line 10
+    from models.r2gen import R2GenModel, 
+                             ^
+SyntaxError: trailing comma not allowed without surrounding parentheses

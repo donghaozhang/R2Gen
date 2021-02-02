@@ -1,0 +1,366 @@
+Namespace(amsgrad=True, ann_path='../mimic_cxr_256/annotation.json', batch_size=400, beam_size=3, block_trigrams=1, bos_idx=0, d_ff=512, d_model=512, d_vf=2048, dataset_name='mimic_cxr', decoding_constraint=0, drop_prob_lm=0.5, dropout=0.1, early_stop=50, eos_idx=0, epochs=30, gamma=0.8, group_size=1, image_dir='../mimic_cxr_256/images/', logit_layers=1, lr_ed=0.0001, lr_scheduler='StepLR', lr_ve=0.0005, max_seq_length=100, monitor_metric='BLEU_4', monitor_mode='max', n_gpu=8, num_heads=8, num_layers=3, num_workers=2, optim='Adam', output_logsoftmax=1, pad_idx=0, record_dir='records/', resume=None, rm_d_model=512, rm_num_heads=8, rm_num_slots=3, sample_method='beam_search', sample_n=1, save_dir='results/mimic_cxr', save_period=1, seed=456789, step_size=1, temperature=1.0, threshold=10, use_bn=0, visual_extractor='resnet101', visual_extractor_pretrained=True, weight_decay=5e-05)
+time for training one epoch 00:50:58
+time for validating one epoch 00:06:26
+time for testing one epoch 00:10:41
+	epoch          : 1
+	train_loss     : 2.950027558440824
+	val_BLEU_1     : 0.31675394243083554
+	val_BLEU_2     : 0.2128221966354218
+	val_BLEU_3     : 0.15000624695585538
+	val_BLEU_4     : 0.10965568441476602
+	val_METEOR     : 0.13135206891799342
+	val_ROUGE_L    : 0.3069731739097857
+	test_BLEU_1    : 0.22473855010237323
+	test_BLEU_2    : 0.14392653261013713
+	test_BLEU_3    : 0.09795518512560733
+	test_BLEU_4    : 0.06980680585275253
+	test_METEOR    : 0.1038318701219483
+	test_ROUGE_L   : 0.2581187117991548
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+Saving current best: model_best.pth ...
+time for training one epoch 00:51:25
+time for validating one epoch 00:06:26
+time for testing one epoch 00:10:45
+	epoch          : 2
+	train_loss     : 1.9485341586953957
+	val_BLEU_1     : 0.306544538725524
+	val_BLEU_2     : 0.2034568090020163
+	val_BLEU_3     : 0.1430869688394888
+	val_BLEU_4     : 0.10523302228019014
+	val_METEOR     : 0.1286473647334697
+	val_ROUGE_L    : 0.3058941671894905
+	test_BLEU_1    : 0.22598590701626017
+	test_BLEU_2    : 0.14211899883948736
+	test_BLEU_3    : 0.09561533487226456
+	test_BLEU_4    : 0.06801868598498455
+	test_METEOR    : 0.10277599244933859
+	test_ROUGE_L   : 0.25475842138565735
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:51:45
+time for validating one epoch 00:06:26
+time for testing one epoch 00:10:40
+	epoch          : 3
+	train_loss     : 1.7798637901838632
+	val_BLEU_1     : 0.3217422507078939
+	val_BLEU_2     : 0.21239975987790238
+	val_BLEU_3     : 0.14918421966359768
+	val_BLEU_4     : 0.10985149085760627
+	val_METEOR     : 0.13153129624690565
+	val_ROUGE_L    : 0.30524225512301784
+	test_BLEU_1    : 0.24265932487975406
+	test_BLEU_2    : 0.15192529579604028
+	test_BLEU_3    : 0.10255795983008896
+	test_BLEU_4    : 0.07354614464476708
+	test_METEOR    : 0.10779904719955373
+	test_ROUGE_L   : 0.2594935410500578
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+Saving current best: model_best.pth ...
+time for training one epoch 00:51:52
+time for validating one epoch 00:06:24
+time for testing one epoch 00:10:35
+	epoch          : 4
+	train_loss     : 1.6949530950853355
+	val_BLEU_1     : 0.3131557552977597
+	val_BLEU_2     : 0.20531409212095045
+	val_BLEU_3     : 0.1435622354262958
+	val_BLEU_4     : 0.10565157129070908
+	val_METEOR     : 0.12926450909431234
+	val_ROUGE_L    : 0.3024833840546825
+	test_BLEU_1    : 0.24952238359634124
+	test_BLEU_2    : 0.15492243704430997
+	test_BLEU_3    : 0.10394577309680547
+	test_BLEU_4    : 0.0744102452551125
+	test_METEOR    : 0.10789010398636238
+	test_ROUGE_L   : 0.25918669820411205
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:49:58
+time for validating one epoch 00:06:25
+time for testing one epoch 00:10:33
+	epoch          : 5
+	train_loss     : 1.6421912258801818
+	val_BLEU_1     : 0.32044135480068586
+	val_BLEU_2     : 0.2124976895692893
+	val_BLEU_3     : 0.1501376932556706
+	val_BLEU_4     : 0.11177136693190455
+	val_METEOR     : 0.1349461499421808
+	val_ROUGE_L    : 0.3126661260786991
+	test_BLEU_1    : 0.26172067219238804
+	test_BLEU_2    : 0.16262561011979165
+	test_BLEU_3    : 0.1085126204043143
+	test_BLEU_4    : 0.0767709587150391
+	test_METEOR    : 0.111193129202894
+	test_ROUGE_L   : 0.26074460121200915
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+Saving current best: model_best.pth ...
+time for training one epoch 00:52:52
+time for validating one epoch 00:06:25
+time for testing one epoch 00:10:34
+	epoch          : 6
+	train_loss     : 1.6065609437500181
+	val_BLEU_1     : 0.3107003532246277
+	val_BLEU_2     : 0.2043424659402292
+	val_BLEU_3     : 0.14337096297440702
+	val_BLEU_4     : 0.10639053756827574
+	val_METEOR     : 0.12889858278772265
+	val_ROUGE_L    : 0.30604755407110096
+	test_BLEU_1    : 0.25967114955475856
+	test_BLEU_2    : 0.16053498502122895
+	test_BLEU_3    : 0.10630454143035661
+	test_BLEU_4    : 0.07518096178597375
+	test_METEOR    : 0.107255478629196
+	test_ROUGE_L   : 0.2568602895531418
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:50:19
+time for validating one epoch 00:06:27
+time for testing one epoch 00:10:34
+	epoch          : 7
+	train_loss     : 1.5811413200778481
+	val_BLEU_1     : 0.35384377406975354
+	val_BLEU_2     : 0.2340874163554125
+	val_BLEU_3     : 0.1644668667589483
+	val_BLEU_4     : 0.12091689347635169
+	val_METEOR     : 0.1406406012842529
+	val_ROUGE_L    : 0.31101412871049444
+	test_BLEU_1    : 0.2933907306543842
+	test_BLEU_2    : 0.1840919795610554
+	test_BLEU_3    : 0.12438577959593856
+	test_BLEU_4    : 0.08903342239186701
+	test_METEOR    : 0.12006010352801891
+	test_ROUGE_L   : 0.26680853718822434
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+Saving current best: model_best.pth ...
+time for training one epoch 00:51:17
+time for validating one epoch 00:06:26
+time for testing one epoch 00:10:35
+	epoch          : 8
+	train_loss     : 1.5623688592164169
+	val_BLEU_1     : 0.3481776545765138
+	val_BLEU_2     : 0.2287941966422369
+	val_BLEU_3     : 0.16010856482458988
+	val_BLEU_4     : 0.11759269034955039
+	val_METEOR     : 0.1389272963091625
+	val_ROUGE_L    : 0.30876786452439414
+	test_BLEU_1    : 0.2855985237131854
+	test_BLEU_2    : 0.1786691238654857
+	test_BLEU_3    : 0.12046576106490614
+	test_BLEU_4    : 0.08616666195001117
+	test_METEOR    : 0.11746626858374529
+	test_ROUGE_L   : 0.2661682793767622
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:52:13
+time for validating one epoch 00:06:24
+time for testing one epoch 00:10:34
+	epoch          : 9
+	train_loss     : 1.5482955970299297
+	val_BLEU_1     : 0.3379219123089138
+	val_BLEU_2     : 0.2222859543095174
+	val_BLEU_3     : 0.1563639819709884
+	val_BLEU_4     : 0.11559914076510286
+	val_METEOR     : 0.1382227651579735
+	val_ROUGE_L    : 0.309050881635988
+	test_BLEU_1    : 0.27428613032667964
+	test_BLEU_2    : 0.17171808289904014
+	test_BLEU_3    : 0.1164316986383276
+	test_BLEU_4    : 0.08399535359905234
+	test_METEOR    : 0.11647300089173526
+	test_ROUGE_L   : 0.266032366669037
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:57:22
+time for validating one epoch 00:06:22
+time for testing one epoch 00:10:30
+	epoch          : 10
+	train_loss     : 1.536973368646123
+	val_BLEU_1     : 0.3373612483210166
+	val_BLEU_2     : 0.22298265194359135
+	val_BLEU_3     : 0.15674972731528
+	val_BLEU_4     : 0.11572391803326612
+	val_METEOR     : 0.1378015350883164
+	val_ROUGE_L    : 0.30943649086625585
+	test_BLEU_1    : 0.2850797156932102
+	test_BLEU_2    : 0.17849151726588874
+	test_BLEU_3    : 0.12085985291066013
+	test_BLEU_4    : 0.08687635628280557
+	test_METEOR    : 0.11817473969665959
+	test_ROUGE_L   : 0.26532082415424785
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:56:19
+time for validating one epoch 00:06:24
+time for testing one epoch 00:10:27
+	epoch          : 11
+	train_loss     : 1.5283328720878815
+	val_BLEU_1     : 0.33689436696887715
+	val_BLEU_2     : 0.22268631037520845
+	val_BLEU_3     : 0.15628945399683303
+	val_BLEU_4     : 0.11492309944933686
+	val_METEOR     : 0.1378332640606587
+	val_ROUGE_L    : 0.31080225993012756
+	test_BLEU_1    : 0.27829853582874375
+	test_BLEU_2    : 0.17442503577218016
+	test_BLEU_3    : 0.11786174279212022
+	test_BLEU_4    : 0.08443352319564616
+	test_METEOR    : 0.11616949501533588
+	test_ROUGE_L   : 0.2642649995100164
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:56:04
+time for validating one epoch 00:06:20
+time for testing one epoch 00:10:31
+	epoch          : 12
+	train_loss     : 1.5217369770193734
+	val_BLEU_1     : 0.33849536595029595
+	val_BLEU_2     : 0.22281634513067583
+	val_BLEU_3     : 0.15653381532787355
+	val_BLEU_4     : 0.11564308757081618
+	val_METEOR     : 0.13810953467961948
+	val_ROUGE_L    : 0.3100853473133116
+	test_BLEU_1    : 0.28212980597600157
+	test_BLEU_2    : 0.1765972509218421
+	test_BLEU_3    : 0.11920437680439055
+	test_BLEU_4    : 0.08534677456601958
+	test_METEOR    : 0.1175518910543732
+	test_ROUGE_L   : 0.26597534295616354
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:58:31
+time for validating one epoch 00:06:23
+time for testing one epoch 00:10:28
+	epoch          : 13
+	train_loss     : 1.5162947147952577
+	val_BLEU_1     : 0.3516208565449916
+	val_BLEU_2     : 0.23205536864947618
+	val_BLEU_3     : 0.16272107181002265
+	val_BLEU_4     : 0.11961095698604898
+	val_METEOR     : 0.14098640385689246
+	val_ROUGE_L    : 0.3117632593186364
+	test_BLEU_1    : 0.2941978615310096
+	test_BLEU_2    : 0.1836545927912451
+	test_BLEU_3    : 0.12380651013344843
+	test_BLEU_4    : 0.0884774344877847
+	test_METEOR    : 0.12044001122877605
+	test_ROUGE_L   : 0.2684112938109078
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:56:53
+time for validating one epoch 00:06:21
+time for testing one epoch 00:10:28
+	epoch          : 14
+	train_loss     : 1.5118042116151074
+	val_BLEU_1     : 0.3448724601207667
+	val_BLEU_2     : 0.22732676853579947
+	val_BLEU_3     : 0.15974540223852693
+	val_BLEU_4     : 0.11787610444891532
+	val_METEOR     : 0.14102007608537384
+	val_ROUGE_L    : 0.31304450861204486
+	test_BLEU_1    : 0.2888185703429468
+	test_BLEU_2    : 0.18021006737167683
+	test_BLEU_3    : 0.12168742699269967
+	test_BLEU_4    : 0.08722804985565825
+	test_METEOR    : 0.12040671415227772
+	test_ROUGE_L   : 0.2680119557091058
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:52:46
+time for validating one epoch 00:06:19
+time for testing one epoch 00:10:33
+	epoch          : 15
+	train_loss     : 1.5083336437470451
+	val_BLEU_1     : 0.34720048916416457
+	val_BLEU_2     : 0.22792154645909804
+	val_BLEU_3     : 0.15935483542276452
+	val_BLEU_4     : 0.11696661468899827
+	val_METEOR     : 0.1405523886415055
+	val_ROUGE_L    : 0.31134048601374154
+	test_BLEU_1    : 0.29534052081727363
+	test_BLEU_2    : 0.18390276304690426
+	test_BLEU_3    : 0.12381436279708334
+	test_BLEU_4    : 0.08855845976276724
+	test_METEOR    : 0.12109003169339128
+	test_ROUGE_L   : 0.26799649762661376
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:54:39
+time for validating one epoch 00:06:23
+time for testing one epoch 00:10:31
+	epoch          : 16
+	train_loss     : 1.5057089321722483
+	val_BLEU_1     : 0.3496310787911859
+	val_BLEU_2     : 0.22961438390674657
+	val_BLEU_3     : 0.16065272708648234
+	val_BLEU_4     : 0.11790407252985931
+	val_METEOR     : 0.1411625801547907
+	val_ROUGE_L    : 0.3111639226315678
+	test_BLEU_1    : 0.29451275797100857
+	test_BLEU_2    : 0.18315886935531184
+	test_BLEU_3    : 0.1230654919898013
+	test_BLEU_4    : 0.08774049479560396
+	test_METEOR    : 0.12091001569688942
+	test_ROUGE_L   : 0.26645709023032604
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:54:47
+time for validating one epoch 00:06:23
+time for testing one epoch 00:10:37
+	epoch          : 17
+	train_loss     : 1.503196461866314
+	val_BLEU_1     : 0.34206541750512204
+	val_BLEU_2     : 0.22479448523929293
+	val_BLEU_3     : 0.15779691758222697
+	val_BLEU_4     : 0.11639126047983023
+	val_METEOR     : 0.13985355586166331
+	val_ROUGE_L    : 0.3112789327305935
+	test_BLEU_1    : 0.2878266574620302
+	test_BLEU_2    : 0.17935798728985625
+	test_BLEU_3    : 0.12099723186760536
+	test_BLEU_4    : 0.08664880270114311
+	test_METEOR    : 0.11958814850600985
+	test_ROUGE_L   : 0.2663587326770292
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:54:08
+time for validating one epoch 00:06:25
+time for testing one epoch 00:10:38
+	epoch          : 18
+	train_loss     : 1.5015954469472301
+	val_BLEU_1     : 0.3508684152633704
+	val_BLEU_2     : 0.2304979579586262
+	val_BLEU_3     : 0.16169578885715083
+	val_BLEU_4     : 0.11929019489460307
+	val_METEOR     : 0.1420249069116626
+	val_ROUGE_L    : 0.3124952619959323
+	test_BLEU_1    : 0.294803011917458
+	test_BLEU_2    : 0.18412375371049816
+	test_BLEU_3    : 0.12452285639238928
+	test_BLEU_4    : 0.08939235472919203
+	test_METEOR    : 0.12188962091250977
+	test_ROUGE_L   : 0.26873662008626736
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:53:03
+time for validating one epoch 00:06:25
+time for testing one epoch 00:10:35
+	epoch          : 19
+	train_loss     : 1.5000020107103063
+	val_BLEU_1     : 0.35002221877249146
+	val_BLEU_2     : 0.23099767270734137
+	val_BLEU_3     : 0.1625953658660996
+	val_BLEU_4     : 0.12026061203962024
+	val_METEOR     : 0.1422311658950846
+	val_ROUGE_L    : 0.3129637260517619
+	test_BLEU_1    : 0.2920019593165369
+	test_BLEU_2    : 0.18188504899614863
+	test_BLEU_3    : 0.12269667945523671
+	test_BLEU_4    : 0.08785203598257449
+	test_METEOR    : 0.12111908825425567
+	test_ROUGE_L   : 0.26695409611096194
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+time for training one epoch 00:53:17
+time for validating one epoch 00:06:23
+time for testing one epoch 00:10:34
+	epoch          : 20
+	train_loss     : 1.498886995336682
+	val_BLEU_1     : 0.3509066116236408
+	val_BLEU_2     : 0.23148801049725828
+	val_BLEU_3     : 0.16293445170102872
+	val_BLEU_4     : 0.12060218850871687
+	val_METEOR     : 0.14231639902167603
+	val_ROUGE_L    : 0.3140953249464734
+	test_BLEU_1    : 0.2941586191902158
+	test_BLEU_2    : 0.18358900785420845
+	test_BLEU_3    : 0.12415991869503
+	test_BLEU_4    : 0.08905410877251486
+	test_METEOR    : 0.12159814074127852
+	test_ROUGE_L   : 0.2679827843135906
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+slurmstepd: error: *** JOB 17052196 ON dgx002 CANCELLED AT 2020-12-26T02:29:58 DUE TO TIME LIMIT ***

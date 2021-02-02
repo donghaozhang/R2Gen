@@ -1,0 +1,18 @@
+Namespace(amsgrad=True, ann_path='../mimic_cxr_256/annotation.json', batch_size=16, beam_size=3, block_trigrams=1, bos_idx=0, d_ff=512, d_model=512, d_vf=2048, dataset_name='mimic_cxr', decoding_constraint=0, drop_prob_lm=0.5, dropout=0.1, early_stop=50, eos_idx=0, epochs=30, gamma=0.8, group_size=1, image_dir='../mimic_cxr_256/images/', logit_layers=1, lr_ed=0.0001, lr_scheduler='StepLR', lr_ve=5e-05, max_seq_length=100, monitor_metric='BLEU_4', monitor_mode='max', n_gpu=8, num_heads=8, num_layers=3, num_workers=2, optim='Adam', output_logsoftmax=1, pad_idx=0, record_dir='records/', resume=None, rm_d_model=512, rm_num_heads=8, rm_num_slots=3, sample_method='beam_search', sample_n=1, save_dir='results/mimic_cxr', save_period=1, seed=456789, step_size=1, temperature=1.0, threshold=10, use_bn=0, visual_extractor='resnet101', visual_extractor_pretrained=True, weight_decay=5e-05)
+	epoch          : 1
+	train_loss     : 1.83904838235903
+	val_BLEU_1     : 0.28503142644922136
+	val_BLEU_2     : 0.1890214514374108
+	val_BLEU_3     : 0.13430723908560227
+	val_BLEU_4     : 0.10123308075904933
+	val_METEOR     : 0.1304390627047301
+	val_ROUGE_L    : 0.30924112394982545
+	test_BLEU_1    : 0.233093540873016
+	test_BLEU_2    : 0.14314506896688922
+	test_BLEU_3    : 0.09435945389297516
+	test_BLEU_4    : 0.06636362109028268
+	test_METEOR    : 0.10616651750013674
+	test_ROUGE_L   : 0.2523888610614026
+Saving checkpoint: results/mimic_cxr/current_checkpoint.pth ...
+Saving current best: model_best.pth ...
+slurmstepd: error: *** JOB 17047288 ON dgx010 CANCELLED AT 2020-12-24T15:05:51 DUE TO TIME LIMIT ***
