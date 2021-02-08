@@ -18,6 +18,125 @@ def clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
 
 
+class TransformerAbv1(nn.Module):
+    # Different from original implmentation, memory operation is introduced in decode
+    # Name of original implmentation is  
+    def __init__(self, encoder, decoder, src_embed, tgt_embed, rm):
+        super(TransformerAbv1, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        self.src_embed = src_embed
+        self.tgt_embed = tgt_embed
+        self.rm = rm
+
+    def forward(self, src, tgt, src_mask, tgt_mask):
+        # print('forward function of Transformer class')
+        return self.decode(self.encode(src, src_mask), src_mask, tgt, tgt_mask)
+
+    def encode(self, src, src_mask):
+        # print('encode function of Transformer class')
+        return self.encoder(self.src_embed(src), src_mask)
+
+    def decode(self, hidden_states, src_mask, tgt, tgt_mask):
+        # print('decode function of Transformer class')
+        memory = self.rm.init_memory(hidden_states.size(0)).to(hidden_states)
+        print('the size of memory after initilization', memory.size())
+        memory = self.rm(self.tgt_embed(tgt), memory)
+        print('hidden_states', hidden_states.size(), 'src_mask', src_mask.size(), 'tgt,', tgt.size(), 'tgt_mask', tgt_mask.size(), 'memory', memory.size())
+        return self.decoder(self.tgt_embed(tgt), hidden_states, src_mask, tgt_mask, memory)
+
+
+class EncoderDecoderAbv1(AttModel):
+
+    def make_model(self, tgt_vocab):
+        # Different: Generator is gone 
+        # only nn.Sequential(Embeddings(d_model, tgt_vocab), c(position)) is called
+        # nn.Sequential(Embeddings(d_model, src_vocab), c(position)) is called
+        # print('make_model function inside EncoderDecoderAug class')
+        c = copy.deepcopy
+        attn = MultiHeadedAttention(self.num_heads, self.d_model)
+        ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
+        position = PositionalEncoding(self.d_model, self.dropout)
+        rm = RelationalMemory(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
+        model = Transformer(
+            Encoder(EncoderLayer(self.d_model, c(attn), c(ff), self.dropout), self.num_layers),
+            Decoder(
+                DecoderLayer(self.d_model, c(attn), c(attn), c(ff), self.dropout, self.rm_num_slots, self.rm_d_model),
+                self.num_layers),
+            lambda x: x,
+            nn.Sequential(Embeddings(self.d_model, tgt_vocab), c(position)),
+            rm)
+        for p in model.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform_(p)
+        return model
+
+    def __init__(self, args, tokenizer):
+        super(EncoderDecoderAbv1, self).__init__(args, tokenizer)
+        # print('init fucntion of EncoderDecoder class is being called')
+        self.args = args
+        self.num_layers = args.num_layers
+        self.d_model = args.d_model
+        self.d_ff = args.d_ff
+        self.num_heads = args.num_heads
+        self.dropout = args.dropout
+        self.rm_num_slots = args.rm_num_slots
+        self.rm_num_heads = args.rm_num_heads
+        self.rm_d_model = args.rm_d_model
+
+        tgt_vocab = self.vocab_size + 1
+
+        self.model = self.make_model(tgt_vocab)
+        self.logit = nn.Linear(args.d_model, tgt_vocab)
+
+    def init_hidden(self, bsz):
+        return []
+
+    def _prepare_feature(self, fc_feats, att_feats, att_masks):
+
+        att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks)
+        memory = self.model.encode(att_feats, att_masks)
+
+        return fc_feats[..., :1], att_feats[..., :1], memory, att_masks
+
+    def _prepare_feature_forward(self, att_feats, att_masks=None, seq=None):
+        att_feats, att_masks = self.clip_att(att_feats, att_masks)
+        att_feats = pack_wrapper(self.att_embed, att_feats, att_masks)
+
+        if att_masks is None:
+            att_masks = att_feats.new_ones(att_feats.shape[:2], dtype=torch.long)
+        att_masks = att_masks.unsqueeze(-2)
+
+        if seq is not None:
+            # crop the last one
+            seq = seq[:, :-1]
+            seq_mask = (seq.data > 0)
+            seq_mask[:, 0] += True
+
+            seq_mask = seq_mask.unsqueeze(-2)
+            seq_mask = seq_mask & subsequent_mask(seq.size(-1)).to(seq_mask)
+        else:
+            seq_mask = None
+
+        return att_feats, seq, att_masks, seq_mask
+
+    def _forward(self, fc_feats, att_feats, seq, att_masks=None):
+        # print('_forward function of EncoderDecoder class is being called')
+        att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks, seq)
+        out = self.model(att_feats, seq, att_masks, seq_mask)
+        outputs = F.log_softmax(self.logit(out), dim=-1)
+        return outputs
+
+    def core(self, it, fc_feats_ph, att_feats_ph, memory, state, mask):
+
+        if len(state) == 0:
+            ys = it.unsqueeze(1)
+        else:
+            ys = torch.cat([state[0][0], it.unsqueeze(1)], dim=1)
+        out = self.model.decode(memory, mask, ys, subsequent_mask(ys.size(1)).to(memory.device))
+        return out[:, -1], [ys.unsqueeze(0)]
+
+
 def attention_augv3(query, key, value, mask=None, dropout=None):
     # print('attention_aug function is being called')
     # This function is advanced version of attention proposed by X-Linear
@@ -60,7 +179,6 @@ class MultiHeadedAttentionAugv3(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, query, key, value, mask=None):
-        # print('forward function of MultiHeadedAttention class')
         if mask is not None:
             mask = mask.unsqueeze(1)
         nbatches = query.size(0)
@@ -68,28 +186,25 @@ class MultiHeadedAttentionAugv3(nn.Module):
             [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
              for l, x in zip(self.linears, (query, key, value))]
         key_refine = self.key_linear(key)
-        key_refine = self.elu(key_refine)
+        key_refine = self.relu(key_refine)
         query1_refine = self.query_linear(query)  # 
-        query1_refine = self.elu(query1_refine)
+        query1_refine = self.relu(query1_refine)
         query1_refine = self.embed_linear(query1_refine)
         query1_refine = self.relu(query1_refine)
-
         query2_refine = self.query2_linear(query)
-        query2_refine = self.elu(query2_refine)
-        # print('query2_refine size()', query2_refine.size())
+        query2_refine = self.relu(query2_refine)
         value_refine = self.value_linear(value)
-        value_refine = self.elu(value_refine)
+        value_refine = self.relu(value_refine)
         qv_refine = torch.matmul(query2_refine, value_refine.transpose(-2, -1))
-        # print('value_refine size()', value_refine.size())
-        # print('qv_refine size', qv_refine.size())
-        output = torch.matmul(qv_refine, value)
-        # print('output size is ', output.size())
-        # print('x size is', x.size())
+        kq_refine = torch.matmul(query1_refine, key_refine.transpose(-2, -1))
+        if mask is not None:
+            kq_refine = kq_refine.masked_fill(mask == 0, -1e9)
+        kq_refine = F.softmax(kq_refine, dim=-1)
+        output = kq_refine * qv_refine
+        output = torch.matmul(output, key)        
         output = output.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
-        # print('the size of scores', scores.size())
-        # print('the size of att_map', att_map.size())
-        # print('the size of x', x.size())
         return self.linears[-1](output)
+
 
 class RelationalMemoryAugv3(nn.Module):
 
@@ -178,7 +293,7 @@ class EncoderDecoderAugv3(AttModel):
         return model
 
     def __init__(self, args, tokenizer):
-        super(EncoderDecoderAugv2, self).__init__(args, tokenizer)
+        super(EncoderDecoderAugv3, self).__init__(args, tokenizer)
         # print('init fucntion of EncoderDecoder class is being called')
         self.args = args
         self.num_layers = args.num_layers
@@ -779,7 +894,9 @@ class Transformer(nn.Module):
     def decode(self, hidden_states, src_mask, tgt, tgt_mask):
         # print('decode function of Transformer class')
         memory = self.rm.init_memory(hidden_states.size(0)).to(hidden_states)
+        print('the size of memory after initilization', memory.size())
         memory = self.rm(self.tgt_embed(tgt), memory)
+        print('hidden_states', hidden_states.size(), 'src_mask', src_mask.size(), 'tgt,', tgt.size(), 'tgt_mask', tgt_mask.size(), 'memory', memory.size())
         return self.decoder(self.tgt_embed(tgt), hidden_states, src_mask, tgt_mask, memory)
 
 

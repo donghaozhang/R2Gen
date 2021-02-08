@@ -7,7 +7,8 @@ from modules.metrics import compute_scores
 from modules.optimizers import build_optimizer, build_lr_scheduler
 from modules.trainer import Trainer
 from modules.loss import compute_loss
-from models.r2gen import R2GenModel, R2GenModelAug, R2GenModelAugv2
+from models.r2gen import R2GenModel, R2GenModelAug, R2GenModelAugv2, R2GenModelAugv3, R2GenModelMimic, R2GenModelAugv3Mimic
+from models.r2gen import R2GenModelAbv1
 
 
 def parse_agrs():
@@ -107,14 +108,21 @@ def main():
     test_dataloader = R2DataLoader(args, tokenizer, split='test', shuffle=False)
 
     # build model architecture
-    if args.model == 'r2gen':
+    if args.model == 'r2gen' and args.dataset_name == 'iu_xray':
         model = R2GenModel(args, tokenizer)
-    elif args.model == 'r2genaug':
+    elif args.model == 'r2gen' and args.dataset_name == 'mimic_cxr':
+        model = R2GenModelMimic(args, tokenizer)
+    elif args.model == 'r2genaug' and args.dataset_name == 'iu_xray':
         # print('this line has been called')
         model = R2GenModelAug(args, tokenizer)
-    elif args.model == 'r2genaugv2':
+    elif args.model == 'r2genaugv2' and args.dataset_name == 'iu_xray':
         model = R2GenModelAugv2(args, tokenizer)
-
+    elif args.model == 'r2genaugv3' and args.dataset_name == 'iu_xray':
+        model = R2GenModelAugv3(args, tokenizer)
+    elif args.model == 'r2genaugv3' and args.dataset_name == 'mimic_cxr':
+        model = R2GenModelAugv3Mimic(args, tokenizer)
+    elif args.model == 'r2genabv1' and args.dataset_name == 'iu_xray':
+        model = R2GenModelAbv1(args, tokenizer)
 
     # get function handles of loss and metrics
     criterion = compute_loss

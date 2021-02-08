@@ -7,7 +7,7 @@ python main.py \
 --threshold 3 \
 --batch_size 40 \
 --epochs 200 \
---save_dir results/iu_xray_augv2 \
+--save_dir results/iu_xray_augxlinear \
 --step_size 50 \
 --gamma 0.1 \
 --n_gpu 1 \

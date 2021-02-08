@@ -1,4 +1,5 @@
-python main.py \
+CUDA_VISIBLE_DEVICES=0 python main.py \
+--model r2gen \
 --image_dir data/mimic_cxr/images/ \
 --ann_path data/mimic_cxr/annotation.json \
 --dataset_name mimic_cxr \
