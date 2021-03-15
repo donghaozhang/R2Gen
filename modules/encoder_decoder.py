@@ -296,7 +296,8 @@ class MultiHeadedAttentionAugv3(nn.Module):
         self.linears = clones(nn.Linear(d_model, d_model), 4)
         self.attn = None
         self.dropout = nn.Dropout(p=dropout)
-        self.embeddim = 64
+        self.embeddim = 64 # num_heads = 8 
+        # self.embeddim = 32 # num_heads = 16
         self.key_linear = nn.Linear(self.embeddim, self.embeddim)
         self.query_linear = nn.Linear(self.embeddim, self.embeddim)
         self.query2_linear = nn.Linear(self.embeddim, self.embeddim)
@@ -315,6 +316,7 @@ class MultiHeadedAttentionAugv3(nn.Module):
         query, key, value = \
             [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
              for l, x in zip(self.linears, (query, key, value))]
+        # print('the size of key', key.size(), 'the size of query', query.size(), 'the size of value', value.size())
         key_refine = self.key_linear(key)
         key_refine = self.relu(key_refine)
         query1_refine = self.query_linear(query)  # 
@@ -766,6 +768,7 @@ class MultiHeadedAttentionAug(nn.Module):
         # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
         # print('the value of h', self.h)
         x, self.attn = attention_aug(query, key, value, mask=mask, dropout=self.dropout)
+        print('the size of key is ', key.size())
         key_refine = self.key_linear(key)
         key_refine = self.elu(key_refine)
         query1_refine = self.query_linear(query)  # 
@@ -1024,9 +1027,9 @@ class Transformer(nn.Module):
     def decode(self, hidden_states, src_mask, tgt, tgt_mask):
         # print('decode function of Transformer class')
         memory = self.rm.init_memory(hidden_states.size(0)).to(hidden_states)
-        print('the size of memory after initilization', memory.size())
+        # print('the size of memory after initilization', memory.size())
         memory = self.rm(self.tgt_embed(tgt), memory)
-        print('hidden_states', hidden_states.size(), 'src_mask', src_mask.size(), 'tgt,', tgt.size(), 'tgt_mask', tgt_mask.size(), 'memory', memory.size())
+        # print('hidden_states', hidden_states.size(), 'src_mask', src_mask.size(), 'tgt,', tgt.size(), 'tgt_mask', tgt_mask.size(), 'memory', memory.size())
         return self.decoder(self.tgt_embed(tgt), hidden_states, src_mask, tgt_mask, memory)
 
 
