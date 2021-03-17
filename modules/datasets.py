@@ -55,3 +55,18 @@ class MimiccxrSingleImageDataset(BaseDataset):
         seq_length = len(report_ids)
         sample = (image_id, image, report_ids, report_masks, seq_length)
         return sample
+
+
+class Danliv2SingleImageDataset(BaseDataset):
+    def __getitem__(self, idx):
+        example = self.examples[idx]
+        image_id = example['id']
+        image_path = example['image_path']
+        image = Image.open(os.path.join(self.image_dir, image_path[0])).convert('RGB')
+        if self.transform is not None:
+            image = self.transform(image)
+        report_ids = example['ids']
+        report_masks = example['mask']
+        seq_length = len(report_ids)
+        sample = (image_id, image, report_ids, report_masks, seq_length)
+        return sample
