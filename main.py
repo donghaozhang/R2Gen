@@ -8,7 +8,7 @@ from modules.optimizers import build_optimizer, build_lr_scheduler
 from modules.trainer import Trainer
 from modules.loss import compute_loss
 from models.r2gen import R2GenModel, R2GenModelAug, R2GenModelAugv2, R2GenModelAugv3, R2GenModelMimic, R2GenModelAugv3Mimic
-from models.r2gen import R2GenModelAbv1, R2GenModelAugv3Abrm, R2GenModelAugv3AbrmMimic
+from models.r2gen import R2GenModelAbv1, R2GenModelAugv3Abrm, R2GenModelAugv3AbrmMimic, R2GenModelAugv3AbrmDanliDatav2
 
 
 def parse_agrs():
@@ -19,7 +19,7 @@ def parse_agrs():
     parser.add_argument('--ann_path', type=str, default='data/iu_xray/annotation.json', help='the path to the directory containing the data.')
 
     # Data loader settings
-    parser.add_argument('--dataset_name', type=str, default='iu_xray', choices=['iu_xray', 'mimic_cxr'], help='the dataset to be used.')
+    parser.add_argument('--dataset_name', type=str, default='iu_xray', choices=['iu_xray', 'mimic_cxr', 'danli_datav2'], help='the dataset to be used.')
     parser.add_argument('--max_seq_length', type=int, default=60, help='the maximum sequence length of the reports.')
     parser.add_argument('--threshold', type=int, default=3, help='the cut off frequency for the words.')
     parser.add_argument('--num_workers', type=int, default=2, help='the number of workers for dataloader.')
@@ -127,6 +127,8 @@ def main():
         model = R2GenModelAugv3Abrm(args, tokenizer)
     elif args.model == 'r2genaugv3abrm' and args.dataset_name == 'mimic_cxr':
         model = R2GenModelAugv3AbrmMimic(args, tokenizer)
+    elif args.model == 'r2genaugv3abrm' and args.dataset_name == 'danli_datav2':
+        model = R2GenModelAugv3AbrmDanliDatav2(args, tokenizer)
 
     # get function handles of loss and metrics
     criterion = compute_loss

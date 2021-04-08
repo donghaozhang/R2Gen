@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from torchvision import transforms
 from torch.utils.data import DataLoader
-from .datasets import IuxrayMultiImageDataset, MimiccxrSingleImageDataset
+from .datasets import IuxrayMultiImageDataset, MimiccxrSingleImageDataset, Danliv2SingleImageDataset
 
 
 class R2DataLoader(DataLoader):
@@ -15,25 +15,38 @@ class R2DataLoader(DataLoader):
         self.tokenizer = tokenizer
         self.split = split
 
+        # if split == 'train':
+        #     self.transform = transforms.Compose([
+        #         transforms.Resize(256),
+        #         transforms.RandomCrop(224),
+        #         transforms.RandomHorizontalFlip(),
+        #         transforms.ToTensor(),
+        #         transforms.Normalize((0.485, 0.456, 0.406),
+        #                              (0.229, 0.224, 0.225))])
+        # else:
+        #     self.transform = transforms.Compose([
+        #         transforms.Resize((224, 224)),
+        #         transforms.ToTensor(),
+        #         transforms.Normalize((0.485, 0.456, 0.406),
+        #                              (0.229, 0.224, 0.225))])
+
         if split == 'train':
             self.transform = transforms.Compose([
                 transforms.Resize(256),
                 transforms.RandomCrop(224),
                 transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize((0.485, 0.456, 0.406),
-                                     (0.229, 0.224, 0.225))])
+                transforms.ToTensor()])
         else:
             self.transform = transforms.Compose([
                 transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize((0.485, 0.456, 0.406),
-                                     (0.229, 0.224, 0.225))])
+                transforms.ToTensor()])
 
         if self.dataset_name == 'iu_xray':
             self.dataset = IuxrayMultiImageDataset(self.args, self.tokenizer, self.split, transform=self.transform)
-        else:
+        elif self.dataset_name == 'mimic_cxr':
             self.dataset = MimiccxrSingleImageDataset(self.args, self.tokenizer, self.split, transform=self.transform)
+        elif self.dataset_name == 'danli_datav2':
+            self.dataset = Danliv2SingleImageDataset(self.args, self.tokenizer, self.split, transform=self.transform)
 
         self.init_kwargs = {
             'dataset': self.dataset,

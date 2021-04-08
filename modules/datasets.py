@@ -62,7 +62,26 @@ class Danliv2SingleImageDataset(BaseDataset):
         example = self.examples[idx]
         image_id = example['id']
         image_path = example['image_path']
-        image = Image.open(os.path.join(self.image_dir, image_path[0])).convert('RGB')
+        print('self.image_dir', self.image_dir)
+        print('image_path[0]', os.path.basename(image_path))
+        # image = Image.open(os.path.join(self.image_dir, image_path[0])).convert('RGB')
+        exts = ['.png', '.PNG', '.jpg', '.jpeg', '.JPG']
+        imflag = False
+        print('xxxxx')
+        for ext in exts:
+            print('for loop has been called', 'ext', ext)
+            filename = os.path.splitext(os.path.basename(image_path))[0]
+            final_impath = '/media/hdd/donghao/imcaption/R2Gen/data/danli_datav2/images/' + filename + ext
+            print('s', 'final_impath', final_impath)
+            if os.path.isfile(final_impath):
+                print('isfile condition', ext)
+                # print('final_impath', final_impath)
+                image = Image.open(final_impath)
+                print('ddd')
+                print('image size', image.size, 'image format', image.format, 'image mode', image.mode)
+                imflag = True
+        # if imflag == False:
+        #     print('false', final_impath)
         if self.transform is not None:
             image = self.transform(image)
         report_ids = example['ids']
