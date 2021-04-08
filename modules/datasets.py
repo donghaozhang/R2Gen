@@ -65,9 +65,9 @@ class Danliv2SingleImageDataset(BaseDataset):
         print('self.image_dir', self.image_dir)
         print('image_path[0]', os.path.basename(image_path))
         # image = Image.open(os.path.join(self.image_dir, image_path[0])).convert('RGB')
-        exts = ['.png', '.PNG', '.jpg', '.jpeg', '.JPG']
+        # exts = ['.png', '.PNG', '.jpg', '.jpeg', '.JPG']
+        exts = ['.png']
         imflag = False
-        print('xxxxx')
         for ext in exts:
             print('for loop has been called', 'ext', ext)
             filename = os.path.splitext(os.path.basename(image_path))[0]
@@ -77,7 +77,6 @@ class Danliv2SingleImageDataset(BaseDataset):
                 print('isfile condition', ext)
                 # print('final_impath', final_impath)
                 image = Image.open(final_impath)
-                print('ddd')
                 print('image size', image.size, 'image format', image.format, 'image mode', image.mode)
                 imflag = True
         # if imflag == False:
