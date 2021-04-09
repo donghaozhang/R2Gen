@@ -147,3 +147,4 @@ data/mimic_cxr.zip
 records/
 results/
 data/*
+debug/

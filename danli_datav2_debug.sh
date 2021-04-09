@@ -1,5 +1,5 @@
 python main.py \
---image_dir data/danli_datav2/images/ \
+--image_dir data/clean_danli_datav2 \
 --model r2genaugv3abrm \
 --ann_path data/danli_datav2/annotationv2_debug.json \
 --dataset_name danli_datav2 \
