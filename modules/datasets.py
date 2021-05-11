@@ -16,6 +16,9 @@ class BaseDataset(Dataset):
         self.ann = json.loads(open(self.ann_path, 'r').read())
 
         self.examples = self.ann[self.split]
+        # print('self.ann[self.split]', self.ann[self.split])
+        # print(xxxx)
+        print('xxxxx', self.split)
         for i in range(len(self.examples)):
             self.examples[i]['ids'] = tokenizer(self.examples[i]['report'])[:self.max_seq_length]
             self.examples[i]['mask'] = [1] * len(self.examples[i]['ids'])
@@ -69,7 +72,7 @@ class Danliv2SingleImageDataset(BaseDataset):
         filename = os.path.splitext(os.path.basename(image_path))[0]
         # final_impath = '/media/hdd/donghao/imcaption/R2Gen/data/danli_datav2/images/' + filename + ext
         final_impath = '/media/hdd/donghao/imcaption/R2Gen/data/clean_danli_datav2/' + filename + '.png'
-        print('s', 'final_impath', final_impath)
+        # print('s', 'final_impath', final_impath)
         image = Image.open(final_impath)
         if self.transform is not None:
             image = self.transform(image)
