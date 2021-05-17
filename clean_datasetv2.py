@@ -48,11 +48,7 @@ for single_dic in cleaned_csv_list:
         # print('start_value', start_value, single_dic['text'][start_value:start_value+30])
         # print('DS', single_dic['DS'])
         without_list.append(single_dic['text'][start_value:start_value+30])
-        # if 'cell or flare.' in single_dic['text']:
-        #     print(single_dic['text'], '!!!!!!')
-        #     print('******')
-        #     print(single_dic['DS'])
-        # if 'without known cause' in single_dic['text']:
+        # if 'without any shadowing' in single_dic['text']:
         #     print(single_dic['text'], '!!!!!!')
         #     print('******')
         #     print(single_dic['DS'])
@@ -64,21 +60,73 @@ without_cnt = Counter(without_list)
 # for key, value in sorted(without_cnt.items(), key=lambda item:item[1], reverse=True):
 #     print(key, value)
 # manually checking whether the word is safe or not
-without_safe_list = ['without success.',
- 'without therapy.', 'without any care before.',
-  'without any problems.', 'without treatment', 'without cnvm', 'without known', 'without treatment']
-print('the length of without dictionary before removing words', len(without_cnt))
+without_unsafe_list = ['without history of tuberous sclerosis']
+without_unsafe_list = without_unsafe_list + ['without any evidence']
+without_unsafe_list = without_unsafe_list + ['no history of glaucoma']
+without_unsafe_list = without_unsafe_list + ['without scleral pigment']
+without_unsafe_list = without_unsafe_list + ['without any evidence of']
+without_unsafe_list = without_unsafe_list + ['without an intervening']
+without_unsafe_list = without_unsafe_list + ['without ocular symptoms']
+without_unsafe_list = without_unsafe_list + ['without the interposition of arterioles or capillaries']
+without_safe_list = ['without success.','without therapy.', 'without any care before.','without any problems.', 'without treatment', 'without cnvm', 'without known', 'without history of trauma', 'without symptom', 'without improvement']
+without_safe_list = without_safe_list + ['without significant']
+without_safe_list = without_safe_list + ['without pressure']
+without_safe_list = without_safe_list + ['without correction']
+without_safe_list = without_safe_list + ['without cell']
+without_safe_list = without_safe_list + ['without pain']
+without_safe_list = without_safe_list + ['without drusen']
+without_safe_list = without_safe_list + ['without recovery']
+without_safe_list = without_safe_list + ['without any recurrence']
+without_safe_list = without_safe_list + ['without wide-field imaging']
+without_safe_list = without_safe_list + ['without plaquinel']
+without_safe_list = without_safe_list + ['without any late leakage']
+without_safe_list = without_safe_list + ['without holes']
+without_safe_list = without_safe_list + ['without scleral indentation']
+without_safe_list = without_safe_list + ['without recurrence']
+without_safe_list = without_safe_list + ['without flecks']
+without_safe_list = without_safe_list + ['without direct']
+without_safe_list = without_safe_list + ['without subretinal new']
+without_safe_list = without_safe_list + ['without edema']
+without_safe_list = without_safe_list + ['without syptoms']
+without_safe_list = without_safe_list + ['without any retinal crystals']
+without_safe_list = without_safe_list + ['without intratetinal edema']
+without_safe_list = without_safe_list + ['without prp']
+without_safe_list = without_safe_list + ['without any underlying']
+without_safe_list = without_safe_list + ['without early hyperfluorescent']
+without_safe_list = without_safe_list + ['without any glial tissue']
+without_safe_list = without_safe_list + ['without a definite mass lesion']
+without_safe_list = without_safe_list + ['without an enlarged blindspot']
+without_safe_list = without_safe_list + ['without hemorrhage']
+without_safe_list = without_safe_list + ['without intraocular lens']
+without_safe_list = without_safe_list + ['without specific treatment']
+without_safe_list = without_safe_list + ['without signs of cnvm']
+without_safe_list = without_safe_list + ['without any ophthalmological']
+# without_safe_list = without_safe_list + 
+without_safe_list = without_safe_list + ['without an apd']
+without_safe_list = without_safe_list + ['without any hx/fhx']
+without_safe_list = without_safe_list + ['without any signs']
+without_safe_list = without_safe_list + ['without foveolar luster']
+without_safe_list = without_safe_list + ['without vitreous seeding']
+without_safe_list = without_safe_list + ['without any sr exudate']
+without_safe_list = without_safe_list + ['without any shadowing']
+# without_safe_list = without_safe_list + ['']
+# without_safe_list = without_safe_list + ['without foveolar']
+# without_safe_list = without_safe_list + 
+# without_safe_list = without_safe_list + 
+# without_safe_list = without_safe_list + ['']
+# without_safe_list = 
+# print('the length of without dictionary before removing words', len(without_cnt))
 without_cnt_copy = without_cnt.copy()
 for key, value in without_cnt.items():
+    print_flag = True
     for safe_item in without_safe_list:
-        print_flag = False
         if safe_item in key:
             # print(key)
             del(without_cnt_copy[key])
             print_flag = False
-        else:
-            print_flag = True
     if print_flag:
         print(key, value)
 print('the length of without dictionary after removing words', len(without_cnt_copy))
 # {k: v for k, v in sorted(without_cnt.items(), key=lambda item: item[1])}without_safe_list
+print('without success' in 'without success. under general')
+
