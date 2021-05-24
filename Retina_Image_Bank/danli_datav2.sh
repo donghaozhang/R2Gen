@@ -1,0 +1,14 @@
+python main.py \
+--image_dir data/danli_datav2/images/ \
+--model r2genaugv3abrm \
+--ann_path data/danli_datav2/annotation.json \
+--dataset_name danli_datav2 \
+--max_seq_length 60 \
+--threshold 3 \
+--batch_size 16 \
+--epochs 100 \
+--save_dir results/danli_datav2 \
+--step_size 100 \
+--gamma 0.1 \
+--seed 9223 \
+--n_gpu 2 
