@@ -18,7 +18,7 @@ class BaseDataset(Dataset):
         self.examples = self.ann[self.split]
         # print('self.ann[self.split]', self.ann[self.split])
         # print(xxxx)
-        print('xxxxx', self.split)
+        # print('xxxxx', self.split)
         for i in range(len(self.examples)):
             self.examples[i]['ids'] = tokenizer(self.examples[i]['report'])[:self.max_seq_length]
             self.examples[i]['mask'] = [1] * len(self.examples[i]['ids'])

@@ -149,3 +149,6 @@ results/
 data/*
 debug/
 debugv8.txt
+comparing_exp/__pycache__
+iuxray_debug_eval.sh
+iuxray_debug_eval.txt

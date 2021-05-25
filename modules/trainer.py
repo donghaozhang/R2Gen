@@ -244,9 +244,12 @@ class Trainer(BaseTrainer):
                     self.device), reports_masks.to(self.device)
                 # images, reports_ids, reports_masks = images.cuda(), reports_ids.cuda(), reports_masks.cuda()
                 output = self.model(images, mode='sample')
+                # print('output', output)
                 #print(self.model.)
                 reports = self.test_dataloader.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.test_dataloader.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
+                print('reports', reports)
+                print('ground_truths', ground_truths, 'images_id', images_id)
                 test_res.extend(reports)
                 test_gts.extend(ground_truths)
             test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
