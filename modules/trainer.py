@@ -5,6 +5,7 @@ import time
 import torch
 import pandas as pd
 from numpy import inf
+import json
 
 
 class BaseTrainer(object):
@@ -239,6 +240,7 @@ class Trainer(BaseTrainer):
         self.model.eval()
         with torch.no_grad():
             test_gts, test_res = [], []
+            test_images_ids_list = []
             for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.test_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
@@ -248,12 +250,23 @@ class Trainer(BaseTrainer):
                 #print(self.model.)
                 reports = self.test_dataloader.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.test_dataloader.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
-                print('reports', reports)
-                print('ground_truths', ground_truths, 'images_id', images_id)
+                # print('reports', reports)
+                # print('ground_truths', ground_truths, 'images_id', images_id)
                 test_res.extend(reports)
                 test_gts.extend(ground_truths)
+                test_images_ids_list.extend(images_id)
             test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
                                         {i: [re] for i, re in enumerate(test_res)})
+            # print('test_met', test_met)
+            save_json = {}
+            save_json['pred_report'] = test_res
+            save_json['gt_report'] = test_gts
+            save_json['images_id'] = test_images_ids_list
+            json_path = os.path.join(self.checkpoint_dir, 'epoch_'+str(epoch)+'_results.json') 
+            # os.path.join(self.checkpoint_dir, 'epoch_'+str(epoch)+'.pth')
+            a_file = open(json_path, "w")
+            json.dump(save_json, a_file)
+            a_file.close()
             log.update(**{'test_' + k: v for k, v in test_met.items()})
         elapsed_time = time.time() - start_time
         print('time for testing one epoch', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
