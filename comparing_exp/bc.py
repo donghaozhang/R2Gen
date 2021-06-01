@@ -39,7 +39,9 @@ class BCNet(nn.Module):
             self.h_net = weight_norm(nn.Linear(h_dim * self.k, h_out), dim=None)
 
     def forward(self, v, q):
+        print('forward function is being called')
         if None == self.h_out:
+            print('if statement is being called')
             v_ = self.v_net(v)
             q_ = self.q_net(q)
             logits = torch.einsum('bvk,bqk->bvqk', (v_, q_))
@@ -47,6 +49,7 @@ class BCNet(nn.Module):
 
         # low-rank bilinear pooling using einsum
         elif self.h_out <= self.c:
+            print('elif staement is being called')
             v_ = self.dropout(self.v_net(v))
             q_ = self.q_net(q)
             logits = torch.einsum('xhyk,bvk,bqk->bhvq', (self.h_mat, v_, q_)) + self.h_bias
@@ -54,11 +57,23 @@ class BCNet(nn.Module):
 
         # batch outer product, linear projection
         # memory efficient but slow computation
-        else: 
+        else:
+            print('else statement is being called')
+            print('step 1 v size', v.size())
+            print('step 2 v size after v_net', self.v_net(v).size())
+            print('step 3 v size after transpose', self.v_net(v).transpose(1,2).size())
             v_ = self.dropout(self.v_net(v)).transpose(1,2).unsqueeze(3)
+            print('step 4 v_ size ', v_.size())
             q_ = self.q_net(q).transpose(1,2).unsqueeze(2)
+            print('step 1 q size', q.size())
+            print('step 2 q size after q_net', self.q_net(q).size())
+            print('step 3 q size after transpose', self.q_net(q).transpose(1,2).size())
+            print('step 4 q step after unsqueeze', q_.size())
             d_ = torch.matmul(v_, q_) # b x h_dim x v x q
+            print('the d_ after matmul of v_ and q_', d_.size())
+            print('d_ after transpose', d_.size())
             logits = self.h_net(d_.transpose(1,2).transpose(2,3)) # b x v x q x h_out
+            print('the size of logits', logits.size())
             return logits.transpose(2,3).transpose(1,2) # b x h_out x v x q
 
     def forward_with_weights(self, v, q, w):

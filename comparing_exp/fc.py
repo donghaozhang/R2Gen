@@ -12,7 +12,7 @@ class FCNet(nn.Module):
     """
     def __init__(self, dims, act='ReLU', dropout=0):
         super(FCNet, self).__init__()
-
+        print('dims list of FCNet', dims)
         layers = []
         for i in range(len(dims)-2):
             in_dim = dims[i]
