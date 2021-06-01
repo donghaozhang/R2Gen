@@ -9,7 +9,7 @@ from modules.trainer import Trainer
 from modules.loss import compute_loss
 from models.r2gen import R2GenModel, R2GenModelAug, R2GenModelAugv2, R2GenModelAugv3, R2GenModelMimic, R2GenModelAugv3Mimic
 from models.r2gen import R2GenModelAbv1, R2GenModelAugv3Abrm, R2GenModelAugv3AbrmMimic, R2GenModelAugv3AbrmDanliDatav2
-
+from models.ban import BanModel
 
 def parse_agrs():
     parser = argparse.ArgumentParser()
@@ -129,6 +129,8 @@ def main():
         model = R2GenModelAugv3AbrmMimic(args, tokenizer)
     elif args.model == 'r2genaugv3abrm' and args.dataset_name == 'danli_datav2':
         model = R2GenModelAugv3AbrmDanliDatav2(args, tokenizer)
+    elif args.model == 'ban' and args.dataset_name == 'iu_xray':
+        model = BanModel(args, tokenizer)
 
     # get function handles of loss and metrics
     criterion = compute_loss
