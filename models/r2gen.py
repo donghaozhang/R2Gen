@@ -308,7 +308,7 @@ class R2GenModelAugv3AbrmMimic(nn.Module):
         #     self.forward = self.forward_iu_xray
         # else:
         #     self.forward = self.forward_mimic_cxr
-
+                                                                                                                                                                                                                                                                                                                        
     def __str__(self):
         model_parameters = filter(lambda p: p.requires_grad, self.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])

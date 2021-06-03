@@ -977,20 +977,20 @@ class EncoderDecoderAug(AttModel):
 
 
 def attention(query, key, value, mask=None, dropout=None):
-    # print('the conventional implementation')
+    print('the conventional implementation')
     # print(xxx)
     # Unchanged
     d_k = query.size(-1)
-    # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+    print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
     # if mask is not None:
     #     print('mask size', mask.size())
     # print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-    # print('the size of scoresxxxx', scores.size())
+    print('the size of scoresxxxx', scores.size())
     if mask is not None:
         scores = scores.masked_fill(mask == 0, -1e9)
     p_attn = F.softmax(scores, dim=-1)
-    # print('p_attn', p_attn.size())
+    print('p_attn', p_attn.size())
     if dropout is not None:
         p_attn = dropout(p_attn)
     # print('result size is', p_attn.size())

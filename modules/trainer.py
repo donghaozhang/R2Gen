@@ -264,6 +264,7 @@ class Trainer(BaseTrainer):
             save_json['images_id'] = test_images_ids_list
             json_path = os.path.join(self.checkpoint_dir, 'epoch_'+str(epoch)+'_results.json') 
             # os.path.join(self.checkpoint_dir, 'epoch_'+str(epoch)+'.pth')
+            print('json_path', json_path)
             a_file = open(json_path, "w")
             json.dump(save_json, a_file)
             a_file.close()

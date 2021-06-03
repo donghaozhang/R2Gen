@@ -11,11 +11,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .att_model import pack_wrapper, AttModel
-from .encoderdecoder import clones, MultiHeadedAttentionAugv3
-from .encoderdecoder import PositionwiseFeedForward, PositionalEncoding
-from .encoderdecoder import RelationalMemoryAugv3, TransformerAugv3Abrm
-from .encoderdecoder import Encoder, EncoderLayer
-from .encoderdecoder import 
+from .encoder_decoder import clones, MultiHeadedAttentionAugv3
+from .encoder_decoder import PositionwiseFeedForward, PositionalEncoding
+from .encoder_decoder import RelationalMemoryAugv3, TransformerAugv3Abrm
+from .encoder_decoder import Encoder, EncoderLayer
+from .encoder_decoder import Decoder, DecoderLayer
+from .encoder_decoder import Embeddings
+from .encoder_decoder import subsequent_mask
+
 
 class EncoderDecoderBan(AttModel):
 
@@ -25,7 +28,7 @@ class EncoderDecoderBan(AttModel):
         # nn.Sequential(Embeddings(d_model, src_vocab), c(position)) is called
         # print('make_model function inside EncoderDecoderAug class')
         c = copy.deepcopy
-        attn = MultiHeadedAttentionAugv3(self.num_heads, self.d_model)
+        attn = MultiHeadedAttentionBan(self.num_heads, self.d_model)
         ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
         position = PositionalEncoding(self.d_model, self.dropout)
         rm = RelationalMemoryAugv3(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
@@ -106,3 +109,71 @@ class EncoderDecoderBan(AttModel):
             ys = torch.cat([state[0][0], it.unsqueeze(1)], dim=1)
         out = self.model.decode(memory, mask, ys, subsequent_mask(ys.size(1)).to(memory.device))
         return out[:, -1], [ys.unsqueeze(0)]
+
+
+def attentionban(query, key, value, mask=None, dropout=None):
+    # print('the conventional implementation')
+    # print(xxx)
+    # Unchanged
+    d_k = query.size(-1)
+    print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+    # if mask is not None:
+    #     print('mask size', mask.size())
+    # print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
+    scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+    print('the size of scores', scores.size())
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, -1e9)
+    p_attn = F.softmax(scores, dim=-1)
+    print('p_attn', p_attn.size())
+    if dropout is not None:
+        p_attn = dropout(p_attn)
+    print('result size is', p_attn.size())
+    return torch.matmul(p_attn, value), p_attn
+
+
+class MultiHeadedAttentionBan(nn.Module):
+    def __init__(self, h, d_model, dropout=0.1):
+        super(MultiHeadedAttentionBan, self).__init__()
+        assert d_model % h == 0
+        self.d_k = d_model // h
+        self.h = h
+        self.linears = clones(nn.Linear(d_model, d_model), 4)
+        self.attn = None
+        self.embeddim = 64
+        self.dropout = nn.Dropout(p=dropout)
+        self.key_linear = nn.Linear(self.embeddim, 3*self.embeddim)
+        self.query_linear = nn.Linear(self.embeddim, 3*self.embeddim)
+        self.value_linear = nn.Linear(self.embeddim, self.embeddim)
+    def forward(self, query, key, value, mask=None):
+        if mask is not None:
+            mask = mask.unsqueeze(1)
+        nbatches = query.size(0)
+        query, key, value = \
+            [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
+             for l, x in zip(self.linears, (query, key, value))]
+        # x, self.attn = attentionban(query, key, value, mask=mask, dropout=self.dropout)
+        d_k = query.size(-1)
+        query_refine = self.query_linear(query)
+        key_refine = self.key_linear(key)
+        value = self.value_linear(value)
+        # print('the size of value_refine', value_refine.size())
+        # scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+        scores = torch.matmul(query_refine, key_refine.transpose(-2, -1)) / math.sqrt(d_k)
+        # print('the size of scores', scores.size())
+        # print('the size of refined_scores', scores_refined.size())
+        if mask is not None:
+            scores = scores.masked_fill(mask == 0, -1e9)
+        p_attn = F.softmax(scores, dim=-1)
+        if self.dropout is not None:
+            self.attn = self.dropout(F.softmax(scores, dim=-1))
+        else:
+            self.attn = p_attn
+        x = torch.matmul(p_attn, value)
+        # x_refine = torch.matmul(p_attn, value_refine)
+        # print('value size', value.size())
+        # print('value refine size', value_refine.size())
+        # print('the final size of x', x.size())
+        # print('the final size of x_refine', x_refine.size())
+        x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
+        return self.linears[-1](x)

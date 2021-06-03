@@ -6,7 +6,7 @@ CUDA_VISIBLE_DEVICES=1 python main.py \
 --max_seq_length 60 \
 --threshold 3 \
 --batch_size 40 \
---epochs 1 \
+--epochs 100 \
 --num_layers 12 \
 --num_heads 8 \
 --save_dir results/ban_comp \
