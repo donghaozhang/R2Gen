@@ -20,7 +20,7 @@ from .encoder_decoder import Embeddings
 from .encoder_decoder import subsequent_mask
 
 
-class EncoderDecoderBan(AttModel):
+class EncoderDecoderXlinear(AttModel):
 
     def make_model(self, tgt_vocab):
         # Different: Generator is gone 
@@ -28,7 +28,7 @@ class EncoderDecoderBan(AttModel):
         # nn.Sequential(Embeddings(d_model, src_vocab), c(position)) is called
         # print('make_model function inside EncoderDecoderAug class')
         c = copy.deepcopy
-        attn = MultiHeadedAttentionBan(self.num_heads, self.d_model)
+        attn = MultiHeadedAttentionXlinear(self.num_heads, self.d_model)
         ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
         position = PositionalEncoding(self.d_model, self.dropout)
         rm = RelationalMemoryAugv3(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
@@ -111,7 +111,7 @@ class EncoderDecoderBan(AttModel):
         return out[:, -1], [ys.unsqueeze(0)]
 
 
-def attentionban(query, key, value, mask=None, dropout=None):
+def attentionxlinear(query, key, value, mask=None, dropout=None):
     # print('the conventional implementation')
     # print(xxx)
     # Unchanged

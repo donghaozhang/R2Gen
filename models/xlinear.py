@@ -4,11 +4,12 @@ import numpy as np
 
 from modules.visual_extractor import VisualExtractor
 from modules.encoder_decoder_ban import EncoderDecoderBan
+
 from modules.encoder_decoder import EncoderDecoder, EncoderDecoderAug, EncoderDecoderAugv2, EncoderDecoderAugv3
 from modules.encoder_decoder import EncoderDecoderAbv1, EncoderDecoderAugv3Abrm
 
 
-class BanMimicModel(nn.Module):
+class XlinearMimicModel(nn.Module):
     def __init__(self, args, tokenizer):
         # print('R2GenModelAug class is being called')
         super(BanMimicModel, self).__init__()
@@ -38,10 +39,10 @@ class BanMimicModel(nn.Module):
         return output
 
 
-class BanModel(nn.Module):
+class XlinearModel(nn.Module):
     def __init__(self, args, tokenizer):
         # print('R2GenModelAug class is being called')
-        super(BanModel, self).__init__()
+        super(XlinearModel, self).__init__()
         self.args = args
         self.tokenizer = tokenizer
         self.visual_extractor = VisualExtractor(args)
