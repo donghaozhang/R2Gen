@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from .visual_extractor import VisualExtractor
-from .encoder_decoder import EncoderDecoder, EncoderDecoderAug, EncoderDecoderAugv2, EncoderDecoderAugv3
-from .encoder_decoder import EncoderDecoderAbv1, EncoderDecoderAugv3Abrm
+from visual_extractor import VisualExtractor
+from encoder_decoder import EncoderDecoder, EncoderDecoderAug, EncoderDecoderAugv2, EncoderDecoderAugv3
+from encoder_decoder import EncoderDecoderAbv1, EncoderDecoderAugv3Abrm
 
 # Find the location R2GenModelAugv3AbrmDanliDatav2
 class R2GenModelAugv3AbrmDanliDatav2(nn.Module):
