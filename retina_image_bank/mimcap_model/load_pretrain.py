@@ -57,6 +57,20 @@ if load_model_flag:
     load_model.load_state_dict(checkpoint['model_state_dict'])
     print('weight of fc1 layer 1 before loading the model')
     print(load_model.state_dict()['fc1.weight'])
+
+create_model_imbank_flag = True
+if create_model_imbank_flag:
+        # parse arguments
+    args = parse_agrs()
+    print(args)
+    # fix random seeds
+    torch.manual_seed(args.seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(args.seed)
+
+    # create tokenizer
+    tokenizer = Tokenizer(args)
 # output = self.model(images, mode='sample')
 # # print('output', output)
 # #print(self.model.)
