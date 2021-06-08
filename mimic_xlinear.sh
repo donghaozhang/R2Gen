@@ -1,0 +1,14 @@
+CUDA_VISIBLE_DEVICES=0 python main.py \
+--model ban \
+--image_dir data/mimic_cxr/images/ \
+--ann_path data/mimic_cxr/annotation.json \
+--dataset_name mimic_cxr \
+--max_seq_length 60 \
+--threshold 3 \
+--batch_size 40 \
+--epochs 30 \
+--num_layers 12 \
+--num_heads 8 \
+--save_dir results/xlinear_mimic_comp \
+--step_size 50 \
+--gamma 0 

@@ -9,7 +9,7 @@ CUDA_VISIBLE_DEVICES=1 python main.py \
 --epochs 100 \
 --num_layers 12 \
 --num_heads 8 \
---save_dir results/ban_comp \
+--save_dir results/xlinear_comp \
 --step_size 50 \
 --gamma 0.1 \
 --n_gpu 1 

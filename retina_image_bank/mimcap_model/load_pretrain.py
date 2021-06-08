@@ -142,9 +142,21 @@ if load_model_flag:
 create_model_imbank_flag = True
 
 if create_model_imbank_flag:
-        # parse arguments
+    # parse arguments
     args = parse_agrs()
-    print(args)
+    # Modify arguments 
+    args.image_dir = 'data/clean_danli_datav2'
+    args.model = 'r2genaugv3abrm'
+    args.ann_path = 'data/danli_datav2/annotationv2_debug.json'
+    args.dataset_name = 'danli_datav2'
+    args.max_seq_length = 60
+    args.threshold = 3
+    args.batch_size = 16
+    args.epochs = 1
+    args.save_dir = 'results/danli_datav2'
+    args.gamma = 0.1
+    args.seed = 9223
+    args.n_gpu = 2 
     # fix random seeds
     torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = True
@@ -154,7 +166,7 @@ if create_model_imbank_flag:
     # create tokenizer
     # tokenizer = Tokenizer(args)
     # create model
-    model = R2GenModelAugv3AbrmDanliDatav2(args=args, tokenizer=None)
+    # model = R2GenModelAugv3AbrmDanliDatav2(args=args, tokenizer=None)
 # output = self.model(images, mode='sample')
 # # print('output', output)
 # #print(self.model.)

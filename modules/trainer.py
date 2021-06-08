@@ -201,6 +201,7 @@ class Trainer(BaseTrainer):
             images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), reports_masks.to(
                 self.device)
             # print('self.device', self.device)
+            print('images', images.size())
             output = self.model(images, reports_ids, mode='train')
             # print('output size is', output.size(), 'report_ids', reports_ids.size(), 'reports_masks', reports_masks.size())
             loss = self.criterion(output, reports_ids, reports_masks)
@@ -245,6 +246,7 @@ class Trainer(BaseTrainer):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
                 # images, reports_ids, reports_masks = images.cuda(), reports_ids.cuda(), reports_masks.cuda()
+                print('images', images.size())
                 output = self.model(images, mode='sample')
                 # print('output', output)
                 #print(self.model.)
