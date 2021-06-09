@@ -3,12 +3,12 @@ python main.py \
 --model r2genaugv3abrm \
 --ann_path data/danli_datav2/annotationv2_debug.json \
 --dataset_name danli_datav2 \
---max_seq_length 60 \
+--max_seq_length 30 \
 --threshold 3 \
 --batch_size 16 \
---epochs 2 \
+--epochs 50 \
 --save_dir results/danli_datav2_web \
 --step_size 100 \
 --gamma 0.1 \
 --seed 9223 \
---n_gpu 2 
+--n_gpu 1 

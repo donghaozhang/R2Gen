@@ -72,7 +72,7 @@ class Danliv2SingleImageDataset(BaseDataset):
         filename = os.path.splitext(os.path.basename(image_path))[0]
         # final_impath = '/media/hdd/donghao/imcaption/R2Gen/data/danli_datav2/images/' + filename + ext
         final_impath = '/media/hdd/donghao/imcaption/R2Gen/data/clean_danli_datav2/' + filename + '.png'
-        print('final_impath', final_impath)
+        # print('final_impath', final_impath)
         # print('s', 'final_impath', final_impath)
         image = Image.open(final_impath)
         if self.transform is not None:

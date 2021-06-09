@@ -129,9 +129,11 @@ def main():
     elif args.model == 'r2genaugv3abrm' and args.dataset_name == 'iu_xray':
         model = R2GenModelAugv3Abrm(args, tokenizer)
     elif args.model == 'r2genaugv3abrm' and args.dataset_name == 'mimic_cxr':
+        # print('R2GenModelAugv3Abrm model ')
         model = R2GenModelAugv3AbrmMimic(args, tokenizer)
     elif args.model == 'r2genaugv3abrm' and args.dataset_name == 'danli_datav2':
         model = R2GenModelAugv3AbrmDanliDatav2(args, tokenizer)
+        # print('danli model is being called')
     elif args.model == 'ban' and args.dataset_name == 'iu_xray':
         model = BanModel(args, tokenizer)
     elif args.model == 'ban' and args.dataset_name == 'mimic_cxr':

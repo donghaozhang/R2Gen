@@ -153,3 +153,5 @@ comparing_exp/__pycache__
 iuxray_debug_eval.sh
 iuxray_debug_eval.txt
 retina_image_bank/mimcap_model/data/
+retina_image_bank/mimcap_model.zip
+retina_image_bank/mimcap_model/saved_model/

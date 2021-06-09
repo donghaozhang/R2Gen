@@ -166,38 +166,26 @@ if create_model_imbank_flag:
     torch.backends.cudnn.benchmark = False
     np.random.seed(args.seed)
 
+    dirpath = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/danli_datav2'
+    # dirpath = './mimcap_model/data/danli_datav2'
+    filename = '7671-Subhyaloid Hemorrhage0.png'
+    model_saved_path = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/saved_model/model_best.pth'
     # create tokenizer
     tokenizer = Tokenizer(args)
     # create model
     model = R2GenModelAugv3AbrmDanliDatav2(args=args, tokenizer=tokenizer)
-    # print(model)
-    dirpath = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/danli_datav2'
-    filename = '7671-Subhyaloid Hemorrhage0.png'
+    checkpoint = torch.load(model_saved_path)
+    model.load_state_dict(checkpoint['state_dict'])
     final_impath = os.path.join(dirpath, filename)
     image = Image.open(final_impath)
     imbank_transform = transforms.Compose([transforms.Resize((224, 224)),transforms.ToTensor()])
     image = imbank_transform(image)
-    print(image.size())
     image = image.unsqueeze(0)
-    # image = image.unsqueeze(0)
     device = torch.device('cuda:0')
     image_batch = image.repeat(args.batch_size, 1, 1, 1)
     image_batch = image_batch.to(device)
-    # checkpoint = torch.load(save_path)
-    # load_model.load_state_dict(checkpoint['model_state_dict'])
     model = model.to(device)
-    # print(device)
     # image size after trasnformation 
-    # print(image.shape)
-    # print(model)
     output = model(image_batch, mode='sample')
-    print('output size', output.size())
     reports = tokenizer.decode_batch(output.cpu().numpy())
-    print(reports)
-
-    # self.model.load_state_dict(checkpoint['state_dict'])
-# output = self.model(images, mode='sample')
-# # print('output', output)
-# #print(self.model.)
-# reports = self.test_dataloader.tokenizer.decode_batch(output.cpu().numpy())
-# ground_truths = self.test_dataloader.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
+    print(reports[0])
