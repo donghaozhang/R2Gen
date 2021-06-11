@@ -3,10 +3,9 @@ import torch.nn as nn
 import numpy as np
 
 from modules.visual_extractor import VisualExtractor
-from modules.encoder_decoder_ban import EncoderDecoderBan
-
 from modules.encoder_decoder import EncoderDecoder, EncoderDecoderAug, EncoderDecoderAugv2, EncoderDecoderAugv3
 from modules.encoder_decoder import EncoderDecoderAbv1, EncoderDecoderAugv3Abrm
+from modules.encoder_decoder_xlinear import EncoderDecoderXlinear
 
 
 class XlinearMimicModel(nn.Module):
@@ -17,7 +16,7 @@ class XlinearMimicModel(nn.Module):
         self.tokenizer = tokenizer
         self.visual_extractor = VisualExtractor(args)
         # modify the following line
-        self.encoder_decoder = EncoderDecoderBan(args, tokenizer)
+        self.encoder_decoder = EncoderDecoderXlinear(args, tokenizer)
         # if args.dataset_name == 'iu_xray':
         #     self.forward = self.forward_iu_xray
         # else:
@@ -47,7 +46,7 @@ class XlinearModel(nn.Module):
         self.tokenizer = tokenizer
         self.visual_extractor = VisualExtractor(args)
         # modify the following line
-        self.encoder_decoder = EncoderDecoderBan(args, tokenizer)
+        self.encoder_decoder = EncoderDecoderXlinear(args, tokenizer)
         # if args.dataset_name == 'iu_xray':
         #     self.forward = self.forward_iu_xray
         # else:

@@ -46,7 +46,7 @@ class EncoderDecoderXlinear(AttModel):
         return model
 
     def __init__(self, args, tokenizer):
-        super(EncoderDecoderBan, self).__init__(args, tokenizer)
+        super(EncoderDecoderXlinear, self).__init__(args, tokenizer)
         # print('init fucntion of EncoderDecoder class is being called')
         self.args = args
         self.num_layers = args.num_layers
@@ -142,9 +142,10 @@ class MultiHeadedAttentionXlinear(nn.Module):
         self.attn = None
         self.embeddim = 64
         self.dropout = nn.Dropout(p=dropout)
-        self.key_linear = nn.Linear(self.embeddim, 3*self.embeddim)
-        self.query_linear = nn.Linear(self.embeddim, 3*self.embeddim)
+        self.key_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.query_linear = nn.Linear(self.embeddim, self.embeddim)
         self.value_linear = nn.Linear(self.embeddim, self.embeddim)
+        self.elu = nn.ELU()
     def forward(self, query, key, value, mask=None):
         if mask is not None:
             mask = mask.unsqueeze(1)
@@ -153,20 +154,33 @@ class MultiHeadedAttentionXlinear(nn.Module):
             [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
              for l, x in zip(self.linears, (query, key, value))]
         # x, self.attn = attentionban(query, key, value, mask=mask, dropout=self.dropout)
+        print('the forward function of MultiHeadedAttentionXlinear is being called')
         d_k = query.size(-1)
+        print('the size of query', query.size())
         query_refine = self.query_linear(query)
+        print('the size of query_refine', query_refine.size())
+        query_refine = self.elu(query_refine)
+        print('the size of key', key.size())
         key_refine = self.key_linear(key)
+        print('the size of key after refinement', key.size())
+        key_refine = self.elu(key_refine)
+        print('elu for key_refine is working')
+        print('the size of value', value.size())
         value = self.value_linear(value)
+        print('the size of value after refinement', value.size())
+        value = self.elu(value)
+        print('elu for value is working')
         # print('the size of value_refine', value_refine.size())
         # scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-        scores = torch.matmul(query_refine, key_refine.transpose(-2, -1)) / math.sqrt(d_k)
+        kq_scores = torch.matmul(query_refine, key_refine.transpose(-2, -1)) / math.sqrt(d_k)
+        print('kq_scores size', kq_scores.size())
         # print('the size of scores', scores.size())
         # print('the size of refined_scores', scores_refined.size())
         if mask is not None:
-            scores = scores.masked_fill(mask == 0, -1e9)
-        p_attn = F.softmax(scores, dim=-1)
+            kq_scores = kq_scores.masked_fill(mask == 0, -1e9)
+        p_attn = F.softmax(kq_scores, dim=-1)
         if self.dropout is not None:
-            self.attn = self.dropout(F.softmax(scores, dim=-1))
+            self.attn = self.dropout(F.softmax(kq_scores, dim=-1))
         else:
             self.attn = p_attn
         x = torch.matmul(p_attn, value)
