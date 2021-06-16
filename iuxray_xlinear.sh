@@ -5,9 +5,8 @@ CUDA_VISIBLE_DEVICES=1 python main.py \
 --dataset_name iu_xray \
 --max_seq_length 60 \
 --threshold 3 \
---batch_size 40 \
---epochs 1 \
---num_layers 12 \
+--batch_size 16 \
+--epochs 10 \
 --num_heads 8 \
 --save_dir results/xlinear_comp \
 --step_size 50 \

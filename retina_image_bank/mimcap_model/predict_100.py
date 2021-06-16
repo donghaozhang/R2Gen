@@ -8,6 +8,9 @@ from tokenizers import Tokenizer
 from medical_report_model import R2GenModelAugv3AbrmDanliDatav2
 from torchvision import transforms
 import os 
+import random
+import csv
+import json
 
 def parse_agrs():
     parser = argparse.ArgumentParser()
@@ -86,62 +89,6 @@ def parse_agrs():
     args = parser.parse_args()
     return args
 
-save_model_flag = False
-if save_model_flag:
-    # Define model
-
-    # Initialize model
-    model = TheModelClass()
-
-    # Initialize optimizer
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-
-    # Print model's state_dict
-    print("Model's state_dict:")
-    for param_tensor in model.state_dict():
-        print(param_tensor, "\t", model.state_dict()[param_tensor].size())
-
-    # Print optimizer's state_dict
-    print("Optimizer's state_dict:")
-    for var_name in optimizer.state_dict():
-        print(var_name, "\t", optimizer.state_dict()[var_name])
-    save_path = '/media/hdd/donghao/imcaption/R2Gen/results/pytorch_train_load/example.pth'
-    epoch = 1
-    torch.save({
-                'epoch': epoch,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                }, save_path)
-
-load_model_flag = False
-if load_model_flag:
-    class TheModelClass(nn.Module):
-        def __init__(self):
-            super(TheModelClass, self).__init__()
-            self.conv1 = nn.Conv2d(3, 6, 5)
-            self.pool = nn.MaxPool2d(2, 2)
-            self.conv2 = nn.Conv2d(6, 16, 5)
-            self.fc1 = nn.Linear(16 * 5 * 5, 120)
-            self.fc2 = nn.Linear(120, 84)
-            self.fc3 = nn.Linear(84, 10)
-
-        def forward(self, x):
-            x = self.pool(F.relu(self.conv1(x)))
-            x = self.pool(F.relu(self.conv2(x)))
-            x = x.view(-1, 16 * 5 * 5)
-            x = F.relu(self.fc1(x))
-            x = F.relu(self.fc2(x))
-            x = self.fc3(x)
-            return x
-    save_path = '/media/hdd/donghao/imcaption/R2Gen/results/pytorch_train_load/example.pth'
-    load_model = TheModelClass()
-    print('weight of fc1 layer 1 before loading the model')
-    print(load_model.state_dict()['fc1.weight'])
-    checkpoint = torch.load(save_path)
-    load_model.load_state_dict(checkpoint['model_state_dict'])
-    print('weight of fc1 layer 1 before loading the model')
-    print(load_model.state_dict()['fc1.weight'])
-
 create_model_imbank_flag = True
 
 if create_model_imbank_flag:
@@ -166,13 +113,8 @@ if create_model_imbank_flag:
     torch.backends.cudnn.benchmark = False
     np.random.seed(args.seed)
 
-    dirpath = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/danli_datav2'
-    # dirpath = './mimcap_model/data/danli_datav2'
-    # filename = '7670-Cystoid Macular Edema0.png'
-    # filename1 = '7671-Subhyaloid Hemorrhage0.png'
-    filename = '7672-Subhyaloid Hemorrhage0.png'
-    # filename = '7673-Macular Pucker0.png'
-    # file_list = []
+    # dirpath = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/sample/train/image' #train
+    dirpath = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/sample/test/image' #test
     model_saved_path = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/saved_model/model_best.pth'
     # create tokenizer
     tokenizer = Tokenizer(args)
@@ -180,16 +122,43 @@ if create_model_imbank_flag:
     model = R2GenModelAugv3AbrmDanliDatav2(args=args, tokenizer=tokenizer)
     checkpoint = torch.load(model_saved_path)
     model.load_state_dict(checkpoint['state_dict'])
-    final_impath = os.path.join(dirpath, filename)
-    image = Image.open(final_impath)
+
+
+    # load testing image list
+    # change the dirpath
+    random.seed(10)
+    json_path = '/media/hdd/donghao/imcaption/R2Gen/data/danli_datav2/annotationv2_debug.json'
+    with open(json_path) as f:
+      json_data = json.load(f)
+    dataset_split = 'test'
+    im_list = json_data[dataset_split]
+    im_list_random = random.sample(im_list, len(im_list))
     imbank_transform = transforms.Compose([transforms.Resize((224, 224)),transforms.ToTensor()])
-    image = imbank_transform(image)
-    image = image.unsqueeze(0)
-    image_batch = image.repeat(args.batch_size, 1, 1, 1)
     device = torch.device('cuda:0')
-    image_batch = image_batch.to(device)
     model = model.to(device)
-    # image size after trasnformation 
-    output = model(image_batch, mode='sample')
-    reports = tokenizer.decode_batch(output.cpu().numpy())
-    print('prediction', reports[0])
+    model.eval()
+    report_pred_list = []
+    report_gt_list = []
+    imname_list = []
+    with open('test_sample1.csv', 'w', newline='') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=',')
+        spamwriter.writerow(['Image', 'Ground Truth', 'Prediction'])
+        for i in range(0,100,1):
+            source_impath = im_list_random[i]['image_path']
+            report_gt = im_list_random[i]['report']
+            filename = os.path.splitext(os.path.basename(source_impath))[0]
+            # copy_source_path = final_impath  + filename + '.png'
+            load_impath = os.path.join(dirpath, filename + '.png')
+            image = Image.open(load_impath)
+            image = imbank_transform(image)
+            image = image.unsqueeze(0)
+            image_batch = image.repeat(args.batch_size, 1, 1, 1)
+            image_batch = image_batch.to(device)
+            output = model(image_batch, mode='sample')
+            reports_pred = tokenizer.decode_batch(output.cpu().numpy())
+            report_gt_list.append(report_gt)
+            # reports
+            spamwriter.writerow([filename + '.png', report_gt, reports_pred[0]])
+            print('ground truth', report_gt)
+            print('prediction', reports_pred[0])
+    # print(report_gt_list)
