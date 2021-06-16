@@ -157,3 +157,4 @@ retina_image_bank/mimcap_model.zip
 retina_image_bank/mimcap_model/saved_model/
 *.csv
 *.csv#
+iuxray_qknn.txt

@@ -153,6 +153,32 @@ class MultiHeadedAttentionXlinear(nn.Module):
         self.spatial_linear = nn.Linear(self.embeddim, self.embeddim)
         self.elu = nn.ELU()
         self.relu = nn.ReLU()
+    def forward(self, query, key, value, mask=None):
+        #  k, q linear
+        if mask is not None:
+            mask = mask.unsqueeze(1)
+        nbatches = query.size(0)
+        query, key, value = \
+            [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
+             for l, x in zip(self.linears, (query, key, value))]
+        d_k = query.size(-1)
+        query = self.in_proj_q(query)
+        key = self.in_proj_k(key)  
+        kq_scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+        
+        if mask is not None:
+            kq_scores = kq_scores.masked_fill(mask == 0, -1e9)
+        p_attn = F.softmax(kq_scores, dim=-1)
+        # print('the size of kq_socres', kq_scores.size())
+        # print('the size of p_attn', p_attn.size())
+        if self.dropout is not None:
+            self.attn = self.dropout(F.softmax(kq_scores, dim=-1))
+        else:
+            self.attn = p_attn
+        x = torch.matmul(p_attn, value)
+        # print('the output size', x.size())
+        x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
+        return self.linears[-1](x)
     # def forward(self, query, key, value, mask=None):
         # if mask is not None:
         #     mask = mask.unsqueeze(1)
@@ -196,30 +222,28 @@ class MultiHeadedAttentionXlinear(nn.Module):
 
         # x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
         # return self.linears[-1](x)
-    def forward(self, query, key, value, mask=None):
-        # original attention mechnism
-        if mask is not None:
-            mask = mask.unsqueeze(1)
-        nbatches = query.size(0)
-        query, key, value = \
-            [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
-             for l, x in zip(self.linears, (query, key, value))]
-        d_k = query.size(-1)  
-        kq_scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-        
-        if mask is not None:
-            kq_scores = kq_scores.masked_fill(mask == 0, -1e9)
-        p_attn = F.softmax(kq_scores, dim=-1)
-        # print('the size of kq_socres', kq_scores.size())
-        # print('the size of p_attn', p_attn.size())
-        if self.dropout is not None:
-            self.attn = self.dropout(F.softmax(kq_scores, dim=-1))
-        else:
-            self.attn = p_attn
-        x = torch.matmul(p_attn, value)
-        # print('the output size', x.size())
-        x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
-        return self.linears[-1](x)
+
+    # def forward(self, query, key, value, mask=None):
+    #     # original attention mechnism
+    #     if mask is not None:
+    #         mask = mask.unsqueeze(1)
+    #     nbatches = query.size(0)
+    #     query, key, value = \
+    #         [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
+    #          for l, x in zip(self.linears, (query, key, value))]
+    #     d_k = query.size(-1)
+    #     kq_scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+    #     if mask is not None:
+    #         kq_scores = kq_scores.masked_fill(mask == 0, -1e9)
+    #     p_attn = F.softmax(kq_scores, dim=-1)
+    #     if self.dropout is not None:
+    #         self.attn = self.dropout(F.softmax(kq_scores, dim=-1))
+    #     else:
+    #         self.attn = p_attn
+    #     x = torch.matmul(p_attn, value)
+    #     x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
+    #     return self.linears[-1](x)
+
 #         --------------
 # x, self.attn = attention(query, key, value, mask=mask, dropout=self.dropout)
 # def attention(query, key, value, mask=None, dropout=None):
