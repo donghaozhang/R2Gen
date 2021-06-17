@@ -153,8 +153,9 @@ class MultiHeadedAttentionXlinear(nn.Module):
         self.spatial_linear = nn.Linear(self.embeddim, self.embeddim)
         self.elu = nn.ELU()
         self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
     def forward(self, query, key, value, mask=None):
-        #  k, q linear
+        #  k, q linear + kq elu
         if mask is not None:
             mask = mask.unsqueeze(1)
         nbatches = query.size(0)
@@ -162,21 +163,27 @@ class MultiHeadedAttentionXlinear(nn.Module):
             [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
              for l, x in zip(self.linears, (query, key, value))]
         d_k = query.size(-1)
-        query = self.in_proj_q(query)
-        key = self.in_proj_k(key)  
+        query_refine = self.in_proj_q(query)
+        query = self.spatial_linear(query)
+        query = self.elu(query)
+        alpha_channel = query_refine.mean(-1)
+        alpha_channel = alpha_channel.unsqueeze(-1)
+        alpha_channel = self.channel_linear(alpha_channel)
+        alpha_channel = torch.matmul(alpha_channel, key.transpose(-2, -1))
+        key = self.in_proj_k(key)
+        key = self.elu(key)  
         kq_scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-        
+        kq_scores = kq_scores * alpha_channel        
         if mask is not None:
             kq_scores = kq_scores.masked_fill(mask == 0, -1e9)
         p_attn = F.softmax(kq_scores, dim=-1)
-        # print('the size of kq_socres', kq_scores.size())
-        # print('the size of p_attn', p_attn.size())
         if self.dropout is not None:
             self.attn = self.dropout(F.softmax(kq_scores, dim=-1))
         else:
             self.attn = p_attn
+        value = self.value_linear(value)
+        value = self.elu(value)
         x = torch.matmul(p_attn, value)
-        # print('the output size', x.size())
         x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
         return self.linears[-1](x)
     # def forward(self, query, key, value, mask=None):

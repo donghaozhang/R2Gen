@@ -166,12 +166,11 @@ if create_model_imbank_flag:
     torch.backends.cudnn.benchmark = False
     np.random.seed(args.seed)
 
-    # dirpath = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/danli_datav2'
-    dirpath = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/australia_dataset/Images2'
+    dirpath = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/danli_datav2'
     # dirpath = './mimcap_model/data/danli_datav2'
     # filename = '7670-Cystoid Macular Edema0.png'
     # filename1 = '7671-Subhyaloid Hemorrhage0.png'
-    filename = 'AA_LE.jpg'
+    filename = '7672-Subhyaloid Hemorrhage0.png'
     # filename = '7673-Macular Pucker0.png'
     # file_list = []
     model_saved_path = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/saved_model/model_best.pth'
@@ -182,20 +181,16 @@ if create_model_imbank_flag:
     checkpoint = torch.load(model_saved_path)
     model.load_state_dict(checkpoint['state_dict'])
     final_impath = os.path.join(dirpath, filename)
+    image = Image.open(final_impath)
+    imbank_transform = transforms.Compose([transforms.Resize((224, 224)),transforms.ToTensor()])
+    image = imbank_transform(image)
+    image = image.unsqueeze(0)
+    image_batch = image.repeat(args.batch_size, 1, 1, 1)
     device = torch.device('cuda:0')
+    image_batch = image_batch.to(device)
     model = model.to(device)
     model.eval()
     # image size after trasnformation 
-    for file in os.listdir(dirpath):
-        if file.endswith(".jpg"):
-            final_impath = os.path.join(dirpath, file)
-            image = Image.open(final_impath)
-            imbank_transform = transforms.Compose([transforms.Resize((224, 224)),transforms.ToTensor()])
-            image = imbank_transform(image)
-            image = image.unsqueeze(0)
-            image_batch = image.repeat(args.batch_size, 1, 1, 1)
-            image_batch = image_batch.to(device)
-            output = model(image_batch, mode='sample')
-            reports = tokenizer.decode_batch(output.cpu().numpy())
-            print('image name:', file)
-            print('report prediction:', reports[0])
+    output = model(image_batch, mode='sample')
+    reports = tokenizer.decode_batch(output.cpu().numpy())
+    print('prediction', reports[0])
