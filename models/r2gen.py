@@ -9,6 +9,7 @@ from modules.encoder_decoder import EncoderDecoderAbv1, EncoderDecoderAugv3Abrm
 class R2GenModel(nn.Module):
     def __init__(self, args, tokenizer):
         super(R2GenModel, self).__init__()
+        # print('initilization function of R2GenModel is being called')
         self.args = args
         self.tokenizer = tokenizer
         self.visual_extractor = VisualExtractor(args)

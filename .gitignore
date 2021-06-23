@@ -159,3 +159,4 @@ retina_image_bank/mimcap_model/saved_model/
 *.csv#
 iuxray_qknn.txt
 retina_image_bank/mimcap_model/prediction.txt
+retina_image_bank/mimcap_model/input_test.png

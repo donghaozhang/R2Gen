@@ -12,6 +12,9 @@ import os
 def parse_agrs():
     parser = argparse.ArgumentParser()
 
+    # Input image
+    parser.add_argument('--image_input_path', type=str, default='/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/danli_datav2/7673-Macular Pucker0.png', help='the path to the directory containing the data.')
+
     # Data input settings
     parser.add_argument('--image_dir', type=str, default='data/iu_xray/images/', help='the path to the directory containing the data.')
     parser.add_argument('--ann_path', type=str, default='data/iu_xray/annotation.json', help='the path to the directory containing the data.')
@@ -170,8 +173,8 @@ if create_model_imbank_flag:
     # dirpath = './mimcap_model/data/danli_datav2'
     # filename = '7670-Cystoid Macular Edema0.png'
     # filename1 = '7671-Subhyaloid Hemorrhage0.png'
-    filename = '7672-Subhyaloid Hemorrhage0.png'
-    # filename = '7673-Macular Pucker0.png'
+    # filename = '7672-Subhyaloid Hemorrhage0.png'
+    filename = '7673-Macular Pucker0.png'
     # file_list = []
     model_saved_path = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/saved_model/model_best.pth'
     # create tokenizer
@@ -180,7 +183,8 @@ if create_model_imbank_flag:
     model = R2GenModelAugv3AbrmDanliDatav2(args=args, tokenizer=tokenizer)
     checkpoint = torch.load(model_saved_path)
     model.load_state_dict(checkpoint['state_dict'])
-    final_impath = os.path.join(dirpath, filename)
+    # final_impath = os.path.join(dirpath, filename)
+    final_impath = args.image_input_path
     image = Image.open(final_impath)
     imbank_transform = transforms.Compose([transforms.Resize((224, 224)),transforms.ToTensor()])
     image = imbank_transform(image)

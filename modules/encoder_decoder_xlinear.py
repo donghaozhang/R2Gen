@@ -170,7 +170,8 @@ class MultiHeadedAttentionXlinear(nn.Module):
         alpha_channel = torch.matmul(alpha_channel, key.transpose(-2, -1))
         alpha_channel = self.sigmoid(alpha_channel)
         key = self.in_proj_k(key)
-        key = self.elu(key)  
+        key = self.elu(key)
+        query = self.in_proj_embed(query)   
         kq_scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
         kq_scores = kq_scores * alpha_channel        
         if mask is not None:

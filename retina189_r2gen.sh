@@ -1,0 +1,14 @@
+CUDA_VISIBLE_DEVICES=1 python main.py \
+--model r2gen \
+--image_dir data/clean_danli_datav2 \
+--ann_path data/danli_datav2/annotationv2_debug.json \
+--dataset_name danli_datav2 \
+--max_seq_length 30 \
+--threshold 3 \
+--batch_size 2 \
+--epochs 50 \
+--num_heads 8 \
+--save_dir results/retina189_r2gen \
+--step_size 50 \
+--gamma 0.1 \
+--n_gpu 1 

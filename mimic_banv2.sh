@@ -9,6 +9,6 @@ CUDA_VISIBLE_DEVICES=0 python main.py \
 --epochs 30 \
 --num_layers 3 \
 --num_heads 8 \
---save_dir results/xlinear_mimic_comp \
+--save_dir results/ban_mimic_compv2 \
 --step_size 1 \
 --gamma 0.8 

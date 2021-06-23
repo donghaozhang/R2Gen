@@ -115,6 +115,8 @@ def main():
         model = R2GenModel(args, tokenizer)
     elif args.model == 'r2gen' and args.dataset_name == 'mimic_cxr':
         model = R2GenModelMimic(args, tokenizer)
+    elif args.model == 'r2gen' and args.dataset_name == 'danli_datav2':
+        model = R2GenModelMimic(args, tokenizer)
     elif args.model == 'r2genaug' and args.dataset_name == 'iu_xray':
         # print('this line has been called')
         model = R2GenModelAug(args, tokenizer)

@@ -977,20 +977,20 @@ class EncoderDecoderAug(AttModel):
 
 
 def attention(query, key, value, mask=None, dropout=None):
-    print('the conventional implementation')
+    # print('the conventional implementation')
     # print(xxx)
     # Unchanged
     d_k = query.size(-1)
-    print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
+    # print('query size', query.size(), 'key size', key.size(), 'value size', value.size())
     # if mask is not None:
     #     print('mask size', mask.size())
     # print('key.transpose(-2, -1)', key.transpose(-2, -1).size())
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-    print('the size of scoresxxxx', scores.size())
+    # print('the size of scoresxxxx', scores.size())
     if mask is not None:
         scores = scores.masked_fill(mask == 0, -1e9)
     p_attn = F.softmax(scores, dim=-1)
-    print('p_attn', p_attn.size())
+    # print('p_attn', p_attn.size())
     if dropout is not None:
         p_attn = dropout(p_attn)
     # print('result size is', p_attn.size())
@@ -1274,21 +1274,27 @@ class RelationalMemory(nn.Module):
 
     def forward_step(self, input, memory):
         # print('forward_step function of RelationalMemory class')
+        # print('input size', input.size(), 'memory size before reshaping', memory.size())
         memory = memory.reshape(-1, self.num_slots, self.d_model)
+        # print('memory size', memory.size())
         q = memory
         k = torch.cat([memory, input.unsqueeze(1)], 1)
         v = torch.cat([memory, input.unsqueeze(1)], 1)
         next_memory = memory + self.attn(q, k, v)
+        # print('next_memory', next_memory.size())
         next_memory = next_memory + self.mlp(next_memory)
-
+        # print('next_memory size after equation 7', next_memory.size())
         gates = self.W(input.unsqueeze(1)) + self.U(torch.tanh(memory))
         gates = torch.split(gates, split_size_or_sections=self.d_model, dim=2)
         input_gate, forget_gate = gates
+        # print('the size of input gate', input_gate.size())
+        # print('the size of forget gate', forget_gate.size())
         input_gate = torch.sigmoid(input_gate)
         forget_gate = torch.sigmoid(forget_gate)
 
         next_memory = input_gate * torch.tanh(next_memory) + forget_gate * memory
         next_memory = next_memory.reshape(-1, self.num_slots * self.d_model)
+        # print('the output size of next_memory', next_memory.size())
 
         return next_memory
 

@@ -6,9 +6,9 @@ CUDA_VISIBLE_DEVICES=1 python main.py \
 --max_seq_length 60 \
 --threshold 3 \
 --batch_size 16 \
---epochs 50 \
+--epochs 1 \
 --num_heads 8 \
---save_dir results/xlinear_comp \
+--save_dir results/debug \
 --step_size 50 \
 --gamma 0.1 \
 --n_gpu 1 
