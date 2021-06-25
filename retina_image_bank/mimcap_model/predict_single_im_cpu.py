@@ -1,26 +1,19 @@
 import torch
+import torch.nn as nn
+import torch.optim as optim
 import argparse
 import numpy as np
-from modules.tokenizers import Tokenizer
-from modules.dataloaders import R2DataLoader
-from modules.metrics import compute_scores
-from modules.optimizers import build_optimizer, build_lr_scheduler
-from modules.trainer import Trainer
-from modules.loss import compute_loss
-from models.r2gen import R2GenModel, R2GenModelAug, R2GenModelAugv2, R2GenModelAugv3, R2GenModelMimic, R2GenModelAugv3Mimic
-from models.r2gen import R2GenModelAbv1, R2GenModelAugv3Abrm, R2GenModelAugv3AbrmMimic, R2GenModelAugv3AbrmDanliDatav2
-from models.ban import BanModel
-from models.ban import BanMimicModel
-from models.xlinear import XlinearModel
-from models.xlinear import XlinearMimicModel
-from models.mev2 import Mev2Model
-from models.mev2 import Mev2ModelMimic
-from models.trans import TransModel
-from models.trans import TransMimicModel
-
+from PIL import Image
+from tokenizers import Tokenizer
+from medical_report_model import R2GenModelAugv3AbrmDanliDatav2
+from torchvision import transforms
+import os 
 
 def parse_agrs():
     parser = argparse.ArgumentParser()
+
+    # Input image
+    parser.add_argument('--image_input_path', type=str, default='/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/danli_datav2/7673-Macular Pucker0.png', help='the path to the directory containing the data.')
 
     # Data input settings
     parser.add_argument('--image_dir', type=str, default='data/iu_xray/images/', help='the path to the directory containing the data.')
@@ -96,79 +89,113 @@ def parse_agrs():
     args = parser.parse_args()
     return args
 
+save_model_flag = False
+if save_model_flag:
+    # Define model
 
-def main():
+    # Initialize model
+    model = TheModelClass()
+
+    # Initialize optimizer
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    # Print model's state_dict
+    print("Model's state_dict:")
+    for param_tensor in model.state_dict():
+        print(param_tensor, "\t", model.state_dict()[param_tensor].size())
+
+    # Print optimizer's state_dict
+    print("Optimizer's state_dict:")
+    for var_name in optimizer.state_dict():
+        print(var_name, "\t", optimizer.state_dict()[var_name])
+    save_path = '/media/hdd/donghao/imcaption/R2Gen/results/pytorch_train_load/example.pth'
+    epoch = 1
+    torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                }, save_path)
+
+load_model_flag = False
+if load_model_flag:
+    class TheModelClass(nn.Module):
+        def __init__(self):
+            super(TheModelClass, self).__init__()
+            self.conv1 = nn.Conv2d(3, 6, 5)
+            self.pool = nn.MaxPool2d(2, 2)
+            self.conv2 = nn.Conv2d(6, 16, 5)
+            self.fc1 = nn.Linear(16 * 5 * 5, 120)
+            self.fc2 = nn.Linear(120, 84)
+            self.fc3 = nn.Linear(84, 10)
+
+        def forward(self, x):
+            x = self.pool(F.relu(self.conv1(x)))
+            x = self.pool(F.relu(self.conv2(x)))
+            x = x.view(-1, 16 * 5 * 5)
+            x = F.relu(self.fc1(x))
+            x = F.relu(self.fc2(x))
+            x = self.fc3(x)
+            return x
+    save_path = '/media/hdd/donghao/imcaption/R2Gen/results/pytorch_train_load/example.pth'
+    load_model = TheModelClass()
+    print('weight of fc1 layer 1 before loading the model')
+    print(load_model.state_dict()['fc1.weight'])
+    checkpoint = torch.load(save_path)
+    load_model.load_state_dict(checkpoint['model_state_dict'])
+    print('weight of fc1 layer 1 before loading the model')
+    print(load_model.state_dict()['fc1.weight'])
+
+create_model_imbank_flag = True
+
+if create_model_imbank_flag:
     # parse arguments
     args = parse_agrs()
-    print(args)
+    # Modify arguments 
+    args.image_dir = 'data/clean_danli_datav2'
+    args.model = 'r2genaugv3abrm'
+    args.ann_path = 'data/danli_datav2/annotationv2_debug.json'
+    args.dataset_name = 'danli_datav2'
+    args.max_seq_length = 60
+    args.threshold = 3
+    args.batch_size = 2
+    args.epochs = 1
+    args.save_dir = 'results/danli_datav2'
+    args.gamma = 0.1
+    args.seed = 9223
+    args.n_gpu = 1 
     # fix random seeds
     torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     np.random.seed(args.seed)
 
+    dirpath = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/data/danli_datav2'
+    # dirpath = './mimcap_model/data/danli_datav2'
+    # filename = '7670-Cystoid Macular Edema0.png'
+    # filename1 = '7671-Subhyaloid Hemorrhage0.png'
+    # filename = '7672-Subhyaloid Hemorrhage0.png'
+    filename = '7673-Macular Pucker0.png'
+    # file_list = []
+    model_saved_path = '/media/hdd/donghao/imcaption/R2Gen/retina_image_bank/mimcap_model/saved_model/model_best.pth'
     # create tokenizer
     tokenizer = Tokenizer(args)
-
-    # create data loader
-    train_dataloader = R2DataLoader(args, tokenizer, split='train', shuffle=True)
-    val_dataloader = R2DataLoader(args, tokenizer, split='val', shuffle=False)
-    test_dataloader = R2DataLoader(args, tokenizer, split='test', shuffle=False)
-
-    # build model architecture
-    if args.model == 'r2gen' and args.dataset_name == 'iu_xray':
-        model = R2GenModel(args, tokenizer)
-    elif args.model == 'r2gen' and args.dataset_name == 'mimic_cxr':
-        model = R2GenModelMimic(args, tokenizer)
-    elif args.model == 'r2gen' and args.dataset_name == 'danli_datav2':
-        model = R2GenModelMimic(args, tokenizer)
-    elif args.model == 'r2genaug' and args.dataset_name == 'iu_xray':
-        # print('this line has been called')
-        model = R2GenModelAug(args, tokenizer)
-    elif args.model == 'r2genaugv2' and args.dataset_name == 'iu_xray':
-        model = R2GenModelAugv2(args, tokenizer)
-    elif args.model == 'r2genaugv3' and args.dataset_name == 'iu_xray':
-        model = R2GenModelAugv3(args, tokenizer)
-    elif args.model == 'r2genaugv3' and args.dataset_name == 'mimic_cxr':
-        model = R2GenModelAugv3Mimic(args, tokenizer)
-    elif args.model == 'r2genabv1' and args.dataset_name == 'iu_xray':
-        model = R2GenModelAbv1(args, tokenizer)
-    elif args.model == 'r2genaugv3abrm' and args.dataset_name == 'iu_xray':
-        model = R2GenModelAugv3Abrm(args, tokenizer)
-    elif args.model == 'r2genaugv3abrm' and args.dataset_name == 'mimic_cxr':
-        # print('R2GenModelAugv3Abrm model ')
-        model = R2GenModelAugv3AbrmMimic(args, tokenizer)
-    elif args.model == 'r2genaugv3abrm' and args.dataset_name == 'danli_datav2':
-        model = R2GenModelAugv3AbrmDanliDatav2(args, tokenizer)
-        # print('danli model is being called')
-    elif args.model == 'ban' and args.dataset_name == 'iu_xray':
-        model = BanModel(args, tokenizer)
-    elif args.model == 'ban' and args.dataset_name == 'mimic_cxr':
-        model = BanMimicModel(args, tokenizer)
-    elif args.model == 'xlinear' and args.dataset_name == 'iu_xray':
-        model = XlinearModel(args, tokenizer)
-    elif args.model == 'xlinear' and args.dataset_name == 'mimic_cxr':
-        model = XlinearMimicModel(args, tokenizer)
-    elif args.model == 'mev2' and args.dataset_name == 'iu_xray':
-        model = Mev2Model(args, tokenizer)
-    elif args.model == 'mev2' and args.dataset_name == 'mimic_cxr':
-        model = Mev2ModelMimic(args, tokenizer)
-    elif args.model == 'transformer' and args.dataset_name == 'iu_xray':
-        model = TransModel(args, tokenizer)
-    elif args.model == 'transformer' and args.dataset_name == 'mimic_cxr':
-        model = TransMimicModel(args, tokenizer)
-     # get function handles of loss and metrics
-    criterion = compute_loss
-    metrics = compute_scores
-
-    # build optimizer, learning rate scheduler
-    optimizer = build_optimizer(args, model)
-    lr_scheduler = build_lr_scheduler(args, optimizer)
-
-    # build trainer and start to train
-    trainer = Trainer(model, criterion, metrics, optimizer, args, lr_scheduler, train_dataloader, val_dataloader, test_dataloader)
-    trainer.train()
-
-
-if __name__ == '__main__':
-    main()
+    # create model
+    model = R2GenModelAugv3AbrmDanliDatav2(args=args, tokenizer=tokenizer)
+    checkpoint = torch.load(model_saved_path)
+    model.load_state_dict(checkpoint['state_dict'])
+    # final_impath = os.path.join(dirpath, filename)
+    final_impath = args.image_input_path
+    image = Image.open(final_impath)
+    imbank_transform = transforms.Compose([transforms.Resize((224, 224)),transforms.ToTensor()])
+    image = imbank_transform(image)
+    image = image.unsqueeze(0)
+    image_batch = image.repeat(args.batch_size, 1, 1, 1)
+    # device = torch.device('cuda:0')
+    device = torch.device('cpu')
+    image_batch = image_batch.to(device)
+    model = model.to(device)
+    model.eval()
+    # image size after trasnformation 
+    output = model(image_batch, mode='sample')
+    reports = tokenizer.decode_batch(output.cpu().numpy())
+    print('prediction', reports[0])

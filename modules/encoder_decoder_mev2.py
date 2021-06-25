@@ -17,6 +17,7 @@ from .encoder_decoder import Encoder, EncoderLayer
 # from .encoder_decoder import Decoder, DecoderLayer
 from .encoder_decoder import Embeddings
 from .encoder_decoder import subsequent_mask
+from .encoder_decoder import ConditionalSublayerConnection
 
 
 class EncoderDecoderMev2(AttModel):
@@ -30,7 +31,7 @@ class EncoderDecoderMev2(AttModel):
         attn = MultiHeadedAttention(self.num_heads, self.d_model)
         ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
         position = PositionalEncoding(self.d_model, self.dropout)
-        rm = RelationalMemoryAugv3(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
+        rm = RelationalMemoryMev2(num_slots=self.rm_num_slots, d_model=self.rm_d_model, num_heads=self.rm_num_heads)
         model = Transformer(
             Encoder(EncoderLayer(self.d_model, c(attn), c(ff), self.dropout), self.num_layers),
             Decoder(
@@ -45,7 +46,7 @@ class EncoderDecoderMev2(AttModel):
         return model
 
     def __init__(self, args, tokenizer):
-        super(EncoderDecoderXlinear, self).__init__(args, tokenizer)
+        super(EncoderDecoderMev2, self).__init__(args, tokenizer)
         # print('init fucntion of EncoderDecoder class is being called')
         self.args = args
         self.num_layers = args.num_layers
@@ -124,7 +125,7 @@ class RelationalMemoryMev2(nn.Module):
                                  nn.ReLU(),
                                  nn.Linear(self.d_model, self.d_model),
                                  nn.ReLU())
-
+        self.input_proj = nn.Linear(self.d_model, self.d_model * 3)
         self.W = nn.Linear(self.d_model, self.d_model * 2)
         self.U = nn.Linear(self.d_model, self.d_model * 2)
 
@@ -149,6 +150,7 @@ class RelationalMemoryMev2(nn.Module):
         k = torch.cat([memory, input.unsqueeze(1)], 1)
         v = torch.cat([memory, input.unsqueeze(1)], 1)
         next_memory = memory + self.attn(q, k, v)
+        mem_attn = self.attn(q, k, v)
         # print('next_memory', next_memory.size())
         next_memory = next_memory + self.mlp(next_memory)
         # print('next_memory size after equation 7', next_memory.size())
@@ -159,8 +161,12 @@ class RelationalMemoryMev2(nn.Module):
         # print('the size of forget gate', forget_gate.size())
         input_gate = torch.sigmoid(input_gate)
         forget_gate = torch.sigmoid(forget_gate)
-
-        next_memory = input_gate * torch.tanh(next_memory) + forget_gate * memory
+        input_projed = self.input_proj(input)
+        # input_projed = memory + input_projed
+        input_projed = input_projed.reshape(-1, self.num_slots, self.d_model)
+        # print('the size of input_proj', input_projed.size())
+        # print('the size of memory', memory.size())
+        next_memory = input_gate * torch.tanh(next_memory) + input_gate * mem_attn + forget_gate * memory + input_projed
         next_memory = next_memory.reshape(-1, self.num_slots * self.d_model)
         # print('the output size of next_memory', next_memory.size())
 
@@ -265,3 +271,78 @@ class DecoderLayer(nn.Module):
         x = self.sublayer[1](x, lambda x: self.src_attn(x, m, m, src_mask), memory)
         return self.sublayer[2](x, self.feed_forward, memory)
 
+
+class LayerNorm(nn.Module):
+    #Unchanged
+    def __init__(self, features, eps=1e-6):
+        super(LayerNorm, self).__init__()
+        self.gamma = nn.Parameter(torch.ones(features))
+        self.beta = nn.Parameter(torch.zeros(features))
+        self.eps = eps
+
+    def forward(self, x):
+        # print('forward function LayerNorm class')
+        mean = x.mean(-1, keepdim=True)
+        std = x.std(-1, keepdim=True)
+        return self.gamma * (x - mean) / (std + self.eps) + self.beta
+
+
+class ConditionalSublayerConnection(nn.Module):
+    def __init__(self, d_model, dropout, rm_num_slots, rm_d_model):
+        super(ConditionalSublayerConnection, self).__init__()
+        self.norm = ConditionalLayerNorm(d_model, rm_num_slots, rm_d_model)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x, sublayer, memory):
+        # print('forward function of ConditionalSublayerConnection class')
+        return x + self.dropout(sublayer(self.norm(x, memory)))
+
+
+class ConditionalLayerNorm(nn.Module):
+    def __init__(self, d_model, rm_num_slots, rm_d_model, eps=1e-6):
+        super(ConditionalLayerNorm, self).__init__()
+        self.gamma = nn.Parameter(torch.ones(d_model))
+        self.beta = nn.Parameter(torch.zeros(d_model))
+        self.rm_d_model = rm_d_model
+        self.rm_num_slots = rm_num_slots
+        self.eps = eps
+
+        self.mlp_gamma = nn.Sequential(nn.Linear(rm_num_slots * rm_d_model, d_model),
+                                       nn.ReLU(inplace=True),
+                                       nn.Linear(rm_d_model, rm_d_model))
+
+        self.mlp_beta = nn.Sequential(nn.Linear(rm_num_slots * rm_d_model, d_model),
+                                      nn.ReLU(inplace=True),
+                                      nn.Linear(d_model, d_model))
+
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                nn.init.constant_(m.bias, 0.1)
+
+    def forward(self, x, memory):
+        # print('forward function of ConditionalLayerNorm class')
+        mean = x.mean(-1, keepdim=True)
+        std = x.std(-1, keepdim=True)
+        delta_gamma = self.mlp_gamma(memory)
+        delta_beta = self.mlp_beta(memory)
+        gamma_hat = self.gamma.clone()
+        beta_hat = self.beta.clone()
+        gamma_hat = torch.stack([gamma_hat] * x.size(0), dim=0)
+        gamma_hat = torch.stack([gamma_hat] * x.size(1), dim=1)
+        beta_hat = torch.stack([beta_hat] * x.size(0), dim=0)
+        beta_hat = torch.stack([beta_hat] * x.size(1), dim=1)
+        gamma_hat += delta_gamma
+        beta_hat += delta_beta
+        return gamma_hat * (x - mean) / (std + self.eps) + beta_hat
+
+
+def attention(query, key, value, mask=None, dropout=None):
+    d_k = query.size(-1)
+    scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, -1e9)
+    p_attn = F.softmax(scores, dim=-1)
+    if dropout is not None:
+        p_attn = dropout(p_attn)
+    return torch.matmul(p_attn, value), p_attn
