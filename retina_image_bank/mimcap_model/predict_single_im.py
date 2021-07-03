@@ -197,4 +197,4 @@ if create_model_imbank_flag:
     # image size after trasnformation 
     output = model(image_batch, mode='sample')
     reports = tokenizer.decode_batch(output.cpu().numpy())
-    print('prediction', reports[0])
+    print('prediction =', reports[0])

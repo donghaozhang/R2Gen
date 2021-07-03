@@ -6,7 +6,13 @@ from modules.metrics import compute_scores
 from tqdm import tqdm
 from pycocoevalcap.bleu.bleu import Bleu
 
-json_path = '/media/hdd/donghao/imcaption/R2Gen/results/iu_xray_debug_eval/epoch_1_results.json'
+# json_path = '/media/hdd/donghao/imcaption/R2Gen/results/iu_xray_debug_eval/epoch_1_results.json'
+# ban
+# json_path = '/media/hdd/donghao/imcaption/R2Gen/results/ban_comp/epoch_32_results.json'
+# xlinear
+# json_path = '/media/hdd/donghao/imcaption/R2Gen/results/xlinear_comp/epoch_44_results.json'
+# pattention
+json_path = '/media/hdd/donghao/imcaption/R2Gen/results/iuxray_pattention/epoch_33_results.json'
 with open(json_path) as f:
   json_data = json.load(f)
 showid = 1
@@ -35,6 +41,7 @@ metrics = Bleu(4)
 method = ['BLEU_1','BLEU_2','BLEU_3','BLEU_4']
 compute_all_metric_flag = False
 for i in tqdm(range(total_testing_num)):
+	print('iteration i', i)
 	single_pred_report = json_data['pred_report'][i]
 	single_gt_report = json_data['gt_report'][i]
 	single_image_id = json_data['images_id'][i]
@@ -73,3 +80,4 @@ json_basename = os.path.basename(json_path)
 json_basename_no_ext = json_basename.split('.')[0]
 csv_path = os.path.join(dirname, json_basename_no_ext+'.csv')
 df.to_csv(csv_path)
+print('csv_path', csv_path)

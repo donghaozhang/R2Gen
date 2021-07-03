@@ -1,0 +1,32 @@
+image name: gl2.jpg
+report prediction: fundus photograph showing diabetic retinopathy optic neuropathy normal eye with hard exudates .
+image name: MRC 2.jpg
+report prediction: fundus photograph showing choroidal nevus .
+image name: LW2.jpg
+report prediction: fundus photograph showing eales peripheral vasculitis optic neuropathy astrocytoma with pigmentary change hyperfluorescence from window defects .
+image name: MRC 1.jpg
+report prediction: fundus photograph showing posterior vitreous detachment .
+image name: HBbLE.jpg
+report prediction: fundus photograph showing diabetic retinopathy .
+image name: LieslRE.jpg
+report prediction: fundus photograph showing eales peripheral vasculitis optic neuropathy normal eye with hemorrhage .
+image name: HBbRE.jpg
+report prediction: fundus photograph showing diabetic retinopathy .
+image name: AA_LE.jpg
+report prediction: fundus photograph showing rpe detachment .
+image name: HBaaRE.jpg
+report prediction: fundus photograph showing age-related macular degeneration dry age-related macular degeneration specifically dry age-related macular degeneration with macular atrophy .
+image name: gl.jpg
+report prediction: fundus photograph showing posterior vitreous detachment .
+image name: AA_RE.jpg
+report prediction: fundus photograph showing diabetic retinopathy .
+image name: HBaaLE.jpg
+report prediction: fundus photograph showing wet age-related macular degeneration choroidal neovascularization rpe detachment .
+image name: LFRE.jpg
+report prediction: fundus photograph showing diabetic retinopathy .
+image name: LFLE.jpg
+report prediction: fundus photograph showing diabetic retinopathy .
+image name: LW.jpg
+report prediction: fundus photograph showing glaucoma .
+image name: LieslLE.jpg
+report prediction: fundus photograph showing best vitelliform macular dystrophy .

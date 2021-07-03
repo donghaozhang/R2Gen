@@ -132,6 +132,53 @@ def attentionban(query, key, value, mask=None, dropout=None):
     return torch.matmul(p_attn, value), p_attn
 
 
+class MultiHeadedAttentionBan(nn.Module):
+    def __init__(self, h, d_model, dropout=0.1):
+        super(MultiHeadedAttentionBan, self).__init__()
+        assert d_model % h == 0
+        self.d_k = d_model // h
+        self.h = h
+        self.linears = clones(nn.Linear(d_model, d_model), 4)
+        self.attn = None
+        self.embeddim = 64
+        self.dropout = nn.Dropout(p=dropout)
+        self.key_linear = nn.Linear(self.embeddim, 3*self.embeddim)
+        self.query_linear = nn.Linear(self.embeddim, 3*self.embeddim)
+        self.value_linear = nn.Linear(self.embeddim, self.embeddim)
+    def forward(self, query, key, value, mask=None):
+        if mask is not None:
+            mask = mask.unsqueeze(1)
+        nbatches = query.size(0)
+        query, key, value = \
+            [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
+             for l, x in zip(self.linears, (query, key, value))]
+        # x, self.attn = attentionban(query, key, value, mask=mask, dropout=self.dropout)
+        d_k = query.size(-1)
+        query_refine = self.query_linear(query)
+        key_refine = self.key_linear(key)
+        value = self.value_linear(value)
+        # print('the size of value_refine', value_refine.size())
+        # scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+        scores = torch.matmul(query_refine, key_refine.transpose(-2, -1)) / math.sqrt(d_k)
+        # print('the size of scores', scores.size())
+        # print('the size of refined_scores', scores_refined.size())
+        if mask is not None:
+            scores = scores.masked_fill(mask == 0, -1e9)
+        p_attn = F.softmax(scores, dim=-1)
+        if self.dropout is not None:
+            self.attn = self.dropout(F.softmax(scores, dim=-1))
+        else:
+            self.attn = p_attn
+        x = torch.matmul(p_attn, value)
+        # x_refine = torch.matmul(p_attn, value_refine)
+        # print('value size', value.size())
+        # print('value refine size', value_refine.size())
+        # print('the final size of x', x.size())
+        # print('the final size of x_refine', x_refine.size())
+        x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
+        return self.linears[-1](x)
+
+
 class MultiHeadedAttentionXlinear(nn.Module):
     def __init__(self, h, d_model, dropout=0.1):
         super(MultiHeadedAttentionXlinear, self).__init__()

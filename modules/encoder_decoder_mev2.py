@@ -98,7 +98,10 @@ class EncoderDecoderMev2(AttModel):
         # print('_forward function of EncoderDecoder class is being called')
         att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks, seq)
         out = self.model(att_feats, seq, att_masks, seq_mask)
+        # print('the size of out in _forward function', out.size())
         outputs = F.log_softmax(self.logit(out), dim=-1)
+        # print('the size of outputs in _forward function', outputs.size())
+        # print('outputs', outputs[0,0,:])
         return outputs
 
     def core(self, it, fc_feats_ph, att_feats_ph, memory, state, mask):
@@ -142,8 +145,8 @@ class RelationalMemoryMev2(nn.Module):
         return memory
 
     def forward_step(self, input, memory):
-        # print('forward_step function of RelationalMemory class')
-        # print('input size', input.size(), 'memory size before reshaping', memory.size())
+        # print('forward_step function of RelationalMemoryMev2 class')
+        print('input size', input.size(), 'input memory size', memory.size())
         memory = memory.reshape(-1, self.num_slots, self.d_model)
         # print('memory size', memory.size())
         q = memory
@@ -168,8 +171,7 @@ class RelationalMemoryMev2(nn.Module):
         # print('the size of memory', memory.size())
         next_memory = input_gate * torch.tanh(next_memory) + input_gate * mem_attn + forget_gate * memory + input_projed
         next_memory = next_memory.reshape(-1, self.num_slots * self.d_model)
-        # print('the output size of next_memory', next_memory.size())
-
+        # print('size next_memory after reshapement', next_memory.size())
         return next_memory
 
     def forward(self, inputs, memory):

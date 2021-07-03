@@ -181,7 +181,7 @@ if create_model_imbank_flag:
     tokenizer = Tokenizer(args)
     # create model
     model = R2GenModelAugv3AbrmDanliDatav2(args=args, tokenizer=tokenizer)
-    checkpoint = torch.load(model_saved_path)
+    checkpoint = torch.load(model_saved_path, map_location='cpu')
     model.load_state_dict(checkpoint['state_dict'])
     # final_impath = os.path.join(dirpath, filename)
     final_impath = args.image_input_path

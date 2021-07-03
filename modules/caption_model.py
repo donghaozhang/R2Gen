@@ -60,7 +60,14 @@ class CaptionModel(nn.Module):
             # beam_seq : tensor containing the word indices of the decoded captions Nxbxl
             # beam_seq_logprobs : log-probability of each decision made, NxbxlxV
             # beam_logprobs_sum : joint log-probability of each beam Nxb
-
+            # print('inside the beam_step function')
+            # print('logprobs', logprobs.size())
+            # print('unaug_logprobs', unaug_logprobs.size())
+            # print('beam_size', beam_size)
+            # print('t', t)
+            # print('beam_seq', beam_seq.size())
+            # print('beam_seq_logprobs', beam_seq_logprobs.size())
+            # print('beam_logprobs_sum', beam_logprobs_sum.size())
             batch_size = beam_logprobs_sum.shape[0]
             vocab_size = logprobs.shape[-1]
             logprobs = logprobs.reshape(batch_size, -1, vocab_size)  # NxbxV
@@ -87,6 +94,8 @@ class CaptionModel(nn.Module):
             beam_seq = torch.cat([beam_seq, selected_ix.unsqueeze(-1)], -1)  # beam_seq Nxbxl
             beam_logprobs_sum = beam_logprobs_sum.gather(1, beam_ix) + \
                                 logprobs.reshape(batch_size, -1).gather(1, ix)
+            # print('assert (beam_logprobs_sum == ys).all() beam_logprobs_sum size', beam_logprobs_sum.size())
+            # print('assert (beam_logprobs_sum == ys).all() ys size', ys.size())
             assert (beam_logprobs_sum == ys).all()
             _tmp_beam_logprobs = unaug_logprobs[state_ix].reshape(batch_size, -1, vocab_size)
             beam_logprobs = unaug_logprobs.reshape(batch_size, -1, vocab_size).gather(1,

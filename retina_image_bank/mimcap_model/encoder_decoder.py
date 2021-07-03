@@ -104,6 +104,7 @@ class EncoderDecoderAugv3Abrm(AttModel):
         if len(state) == 0:
             ys = it.unsqueeze(1)
         else:
+            # print('it type and state type', it.unsqueeze(S).type(), state.type())
             ys = torch.cat([state[0][0], it.unsqueeze(1)], dim=1)
         out = self.model.decode(memory, mask, ys, subsequent_mask(ys.size(1)).to(memory.device))
         return out[:, -1], [ys.unsqueeze(0)]
